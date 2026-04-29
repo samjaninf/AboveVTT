@@ -2247,7 +2247,6 @@ class JournalManager{
 
         for(let i=0; i<window.playerUsers.length; i++){
 			if(whisper_container.find(`input[name='${window.playerUsers[i].userId}']`).length == 0){
-				const randomId = uuid();
 				let whisper_toggle=$(`<input type='checkbox' name='${window.playerUsers[i].userId}'/>`);
 				let whisper_row = $(`<div class='whisper_toggle_row'><label>${window.playerUsers[i].userName}</label></div>`)
 				whisper_toggle.off('click.toggle').on('click.toggle', function(e){
@@ -2320,7 +2319,10 @@ class JournalManager{
 			}
 			return container;
 		});
+		//todo: decide if we like new method and cleanup this old one
 		sendToGamelogButton.clone(true, true).insertAfter(blocks);
+		createSendPlayerButton(blocks, "send").insertAfter(blocks);
+		
 		if(allDiceRegex.test($(tables).find('tr:first-of-type>:first-child').text())){
 			let result = $(tables).find(`tbody > tr td:last-of-type`);
 			$(tables).find('td').css({
