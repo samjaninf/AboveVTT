@@ -2948,7 +2948,7 @@ function createSendPlayerMenu(menuId, target) {
       selected.toggleClass('js-popup--is-active');      
     }
   }
-  const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id:SPECTATOR_WHISPER_ID, name: "Spectator", active: true}];
+  const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id: SPECTATOR_WHISPER_ID, label: "-Spectator-", active: true}];
   const menu = createDialogMenu(menuId, [
     { id: "_send", label: "📩 Send To Log", callback: (e) => callback_with_selection(e, "send")},
     { id: "_pop", label: "⬆️ Popup", callback: (e) => callback_with_selection(e, "pop")},
