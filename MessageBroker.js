@@ -1124,8 +1124,8 @@ class MessageBroker {
 				}
 			} else if(msg.eventType=="custom/myVTT/Popup"){
 				if(!window.DM &&
-				   !(msg.data.from && msg.data.from != window.PLAYER_ID) &&
-				   !(msg.data.to && msg.data.to != "everyone" && msg.data.to != window.PLAYER_ID)) {
+   				   !(msg.data.from && msg.data.from != window.PLAYER_ID) &&
+				   canHearWhisper(msg.data.whisper)) {
 					if(msg.data.delete == true){
 						$.magnificPopup.close();
 					} else {
@@ -1326,11 +1326,11 @@ class MessageBroker {
 				dicePeer.close();
 				if(msg.data.to != "everyone"){
 					window.MB.inject_chat({
-              player: window.PLAYER_NAME,
-              img: window.PLAYER_IMG,
-              text: `<span class="flex-wrap-center-chat-message">One of your dice stream connections has failed/disconnected. Try reconnecting to the dice stream if this was not intentional.<br/><br/></div>`,
-              whisper: window.PLAYER_NAME
-          });
+						player: window.PLAYER_NAME,
+						img: window.PLAYER_IMG,
+						text: `<span class="flex-wrap-center-chat-message">One of your dice stream connections has failed/disconnected. Try reconnecting to the dice stream if this was not intentional.<br/><br/></div>`,
+						whisper: window.PLAYER_NAME
+					});
 				}
 			} else if(msg.eventType == "custom/myVTT/disabledicestream"){
 				enable_dice_streaming_feature(false);
@@ -1371,21 +1371,21 @@ class MessageBroker {
 				peer.onconnectionstatechange=() => {
 					if(peer.connectionState=="connected"){
 						window.MB.inject_chat({
-                player: window.PLAYER_NAME,
-                img: window.PLAYER_IMG,
-                text: `<span class="flex-wrap-center-chat-message"><p>A dice stream peer has ${peer.connectionState}. <br/><br/></div>`,
-                whisper: window.PLAYER_NAME,
-	          });
+							player: window.PLAYER_NAME,
+							img: window.PLAYER_IMG,
+							text: `<span class="flex-wrap-center-chat-message"><p>A dice stream peer has ${peer.connectionState}. <br/><br/></div>`,
+							whisper: window.PLAYER_NAME,
+						});
 					}
-
+					
 					if(peer.connectionState=="closed" || peer.connectionState=="failed" || peer.connectionState == "disconnected"){
 						peer.restartIce();
 						window.MB.inject_chat({
-                player: window.PLAYER_NAME,
-                img: window.PLAYER_IMG,
-                text: `<span class="flex-wrap-center-chat-message"><p>A dice stream connection has ${peer.connectionState}.</p><p> An automatic reconnect is being attempted. </p><p>If you are still unable to see one or more of your groups dice you may have to manually disable then reenable your dice stream in the chat above.</p><br/><br/></div>`,
-                whisper: window.PLAYER_NAME,
-	          });	          
+							player: window.PLAYER_NAME,
+							img: window.PLAYER_IMG,
+							text: `<span class="flex-wrap-center-chat-message"><p>A dice stream connection has ${peer.connectionState}.</p><p> An automatic reconnect is being attempted. </p><p>If you are still unable to see one or more of your groups dice you may have to manually disable then reenable your dice stream in the chat above.</p><br/><br/></div>`,
+							whisper: window.PLAYER_NAME,
+						});	          
 					}
 				};
 				peer.onnegotiationneeded = () => {
@@ -1463,20 +1463,20 @@ class MessageBroker {
 				peer.onconnectionstatechange=() => {
 					if(peer.connectionState=="connected"){
 						window.MB.inject_chat({
-                player: window.PLAYER_NAME,
-                img: window.PLAYER_IMG,
-                text: `<span class="flex-wrap-center-chat-message"><p>A dice stream peer has ${peer.connectionState}. <br/><br/></div>`,
-                whisper: window.PLAYER_NAME,
-	          });
+							player: window.PLAYER_NAME,
+							img: window.PLAYER_IMG,
+							text: `<span class="flex-wrap-center-chat-message"><p>A dice stream peer has ${peer.connectionState}. <br/><br/></div>`,
+							whisper: window.PLAYER_NAME,
+						});
 					}
 					if((peer.connectionState=="closed") || (peer.connectionState=="failed" || peer.connectionState == "disconnected")){
 						peer.restartIce();
 						window.MB.inject_chat({
-                player: window.PLAYER_NAME,
-                img: window.PLAYER_IMG,
-                text: `<span class="flex-wrap-center-chat-message"><p>A dice stream connection has ${peer.connectionState}.</p><p> An automatic reconnect is being attempted. </p><p>If you are still unable to see one or more of your groups dice you may have to manually disable then reenable your dice stream in the chat above.</p><br/><br/></div>`,
-                whisper: window.PLAYER_NAME,
-	          });
+							player: window.PLAYER_NAME,
+							img: window.PLAYER_IMG,
+							text: `<span class="flex-wrap-center-chat-message"><p>A dice stream connection has ${peer.connectionState}.</p><p> An automatic reconnect is being attempted. </p><p>If you are still unable to see one or more of your groups dice you may have to manually disable then reenable your dice stream in the chat above.</p><br/><br/></div>`,
+							whisper: window.PLAYER_NAME,
+						});
 					}
 				};
 		
@@ -2057,8 +2057,8 @@ class MessageBroker {
 
 		if(data.dmonly && !(window.DM) && !local) // /dmroll only for DM of or the user who initiated it
 			return $("<div/>");
-				
-		if(data.whisper && (data.whisper!=window.PLAYER_NAME && !(Array.isArray(data.whisper) && data.whisper.includes(`${window.myUser}`))) && (!local))
+
+		if(!canHearWhisper(data.whisper) && (!local))
 			return $("<div/>");
 		//notify_gamelog();
 

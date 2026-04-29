@@ -1886,12 +1886,22 @@ async function rebuild_window_pcs() {
  * @returns {string[]}
  */
 function get_my_known_languages() {
+  if(is_spectator_page()) return ['Common', 'Telepathy']; //reasonable default
   const pc = find_pc_by_player_id(my_player_id())
   const knownLanguages = pc?.proficiencyGroups.find(g => g.group === "Languages")?.values?.trim().split(/\s*,\s*/gi) ?? [];
   knownLanguages?.push('Telepathy');
   return knownLanguages;
 }
 
+// the special string to whisper to spectator screens
+const SPECTATOR_WHISPER_ID = "-spectator";
+
+function canHearWhisper(whisper) {
+  if(!whisper) return true;
+  const myName = is_spectator_page() ? SPECTATOR_WHISPER_ID : window.PLAYER_NAME;
+  const myId = is_spectator_page() ? SPECTATOR_WHISPER_ID : `${window.myUser}`
+  return (whisper === myName || (Array.isArray(whisper) && whisper.includes(myId)));
+}
 
 function update_pc_with_data(playerId, data) {
   if (data.constructor !== Object) {
@@ -2916,14 +2926,15 @@ function createSendPlayerMenu(menuId, target) {
       send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, selected);
     } else {
       const imgSrc = $(".magnify")?.attr("src")
-      console.log("POP TO PLAYERS", selected, targetBlock[0].outerHTML);
-        if(imgSrc) {
-          window.MB.sendMessage('custom/myVTT/Popup',  {
-            src: imgSrc,
-            timed: 10000,
-            from:window.PLAYER_ID
-          });
-        }
+      //todo: decide to send to everyone or iterate through users....
+      if(imgSrc) {
+        window.MB.sendMessage('custom/myVTT/Popup',  {
+          src: imgSrc,
+          timed: 10000,
+          whisper: selected,
+          from:window.PLAYER_ID
+        });
+      }
     }
     $(e.target).removeClass('js-popup--is-active');
   };
@@ -2937,7 +2948,7 @@ function createSendPlayerMenu(menuId, target) {
       selected.toggleClass('js-popup--is-active');      
     }
   }
-  const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values()];
+  const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id:SPECTATOR_WHISPER_ID, name: "Spectator", active: true}];
   const menu = createDialogMenu(menuId, [
     { id: "_send", label: "📩 Send To Log", callback: (e) => callback_with_selection(e, "send")},
     { id: "_pop", label: "⬆️ Popup", callback: (e) => callback_with_selection(e, "pop")},
