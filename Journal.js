@@ -1817,7 +1817,8 @@ class JournalManager{
 		note_container.attr("role", "dialog");
 		note_container.addClass(['ui-dialog', 'ui-corner-all', 'ui-widget', 'ui-widget-content', 'ui-front', 'ui-draggable', 'ui-resizable'])
 		note_container.find('.title_bar').off('dblclick.adjustClasses').on('dblclick.adjustClasses', function (event) {
-			note_container.toggleClass(['ui-dialog', 'ui-corner-all', 'ui-widget', 'ui-widget-content', 'ui-front', 'ui-draggable', 'ui-resizable']);
+			const isMinimized = $(this).hasClass('minimized');
+			note_container.toggleClass(['ui-dialog', 'ui-corner-all', 'ui-widget', 'ui-widget-content', 'ui-front', 'ui-draggable', 'ui-resizable'], !isMinimized);
 		});
 		if(!noteAlreadyOpen){
 			note.attr('title',self.notes[id].title);
@@ -1915,6 +1916,14 @@ class JournalManager{
 		let note_text= noteAlreadyOpen ? note.find('.note-text') : $("<div class='note-text'/>");
 		if(noteAlreadyOpen){
 			note_text.empty();
+			const titleBarMinimized = note_container.find('.title_bar.minimized');
+			if(titleBarMinimized.length>0){
+				titleBarMinimized.dblclick(); // if note is minimized open it
+			} else{
+				note_container.css('display', '') // if note is hidden for popout this will display it
+			}
+			
+
 		}
 		note_text.append(self.notes[id].text); // valid tags are controlled by tinyMCE.init()
 		this.translateHtmlAndBlocks(note_text, id).then(() => {	
