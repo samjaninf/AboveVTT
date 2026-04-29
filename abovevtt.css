@@ -14823,7 +14823,8 @@ button#displayedDiceFormulaExit:hover {
 }
 .js-popup-option {
     width: 100%;
-    display: flex;
+    display: inline-flex;
+    align-items: center;
     border: 1px;
     flex-wrap: wrap;
     font-family: Roboto Condensed,Roboto,Helvetica,sans-serif;
@@ -14832,6 +14833,7 @@ button#displayedDiceFormulaExit:hover {
     line-height: 1;
     font-weight: 700;
     font-size: 12px;
+    gap: 4px;    
     text-transform: uppercase;
     background-color: #f2f2f2;
     border-radius: 3px;
@@ -14844,8 +14846,8 @@ button#displayedDiceFormulaExit:hover {
     width: 100%;
     display: block;
     font-family: Roboto Condensed,Roboto,Helvetica,sans-serif;
-    color: #838383;
-    font-weight: 700;
+    color: black; 
+    font-weight: bold;
     font-size: 12px;
     text-transform: uppercase;
     background-color: #f2f2f2;

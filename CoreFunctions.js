@@ -2842,7 +2842,8 @@ function dialogMenuOption(rootId, container, opt) {
   if(opt.type === 'hr') {
     $(`<span class="js-popup-decoration">${opt.label || ""}</span>`).appendTo(container);      
   } else {
-    const button = $(`<button id='${rootId}_${opt.id}' class='js-popup-option' data-id='${opt.id}'>${opt.label}</button>`);
+    const icon = opt.icon ? `<span class="material-symbols-outlined" style="font-size: inherit;">${opt.icon}</span>` : "";
+    const button = $(`<button id='${rootId}_${opt.id}' class='js-popup-option' data-id='${opt.id}'>${icon}${opt.label}</button>`);
     //ddbc-tab-options__header-heading
     const callback = opt.callback;
     if(opt.active) button.addClass("js-popup--is-active");
@@ -2950,9 +2951,9 @@ function createSendPlayerMenu(menuId, target) {
   }
   const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id: SPECTATOR_WHISPER_ID, label: "-Spectator-", active: true}];
   const menu = createDialogMenu(menuId, [
-    { id: "_send", label: "📩 Send To Log", callback: (e) => callback_with_selection(e, "send")},
-    { id: "_pop", label: "⬆️ Popup", callback: (e) => callback_with_selection(e, "pop")},
-    { id: "_everyone", label: "🔁 Toggle All", callback: (e) => toggle_everyone(e, 3)},
+    { id: "_send", label: "Send To Log", callback: (e) => callback_with_selection(e, "send"), icon: "login"},
+    { id: "_pop", label: "Popup", icon: "toast", callback: (e) => callback_with_selection(e, "pop")},
+    { id: "_everyone", label: "Toggle All", icon: "toggle_on", callback: (e) => toggle_everyone(e, 3)},
     { type: "hr", label: "Users" },
     ...users
   ]);
