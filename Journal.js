@@ -2319,9 +2319,12 @@ class JournalManager{
 			}
 			return container;
 		});
+		blocks.each((i, block) => {
+			createSendPlayerButton(block, "send", block instanceof HTMLImageElement).insertAfter(block);			
+		});
 		//todo: decide if we like new method and cleanup this old one
 		sendToGamelogButton.clone(true, true).insertAfter(blocks);
-		createSendPlayerButton(blocks, "send").insertAfter(blocks);
+
 		
 		if(allDiceRegex.test($(tables).find('tr:first-of-type>:first-child').text())){
 			let result = $(tables).find(`tbody > tr td:last-of-type`);

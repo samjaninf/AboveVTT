@@ -14840,6 +14840,23 @@ button#displayedDiceFormulaExit:hover {
     white-space: nowrap;
     background-image: unset;
 }
+.js-popup-decoration {
+    width: 100%;
+    display: block;
+    font-family: Roboto Condensed,Roboto,Helvetica,sans-serif;
+    color: #838383;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    background-color: #f2f2f2;
+    margin: 1px;
+    white-space: nowrap;
+    background-image: unset;
+    text-align: center;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #ccc;
+}
 .js-popup {
     padding: 0;
     z-index: 10000000;

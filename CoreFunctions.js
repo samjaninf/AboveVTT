@@ -2830,7 +2830,7 @@ function display_url_embeded(url){
 // -- more general options for dialog menus
 function dialogMenuOption(rootId, container, opt) {
   if(opt.type === 'hr') {
-    $('<hr style="margin-top: 1px; margin-bottom: 1px; padding: 0; border: 0; border-top: 2px solid #ccc;"/>').appendTo(container);
+    $(`<span class="js-popup-decoration">${opt.label || ""}</span>`).appendTo(container);      
   } else {
     const button = $(`<button id='${rootId}_${opt.id}' class='js-popup-option' data-id='${opt.id}'>${opt.label}</button>`);
     //ddbc-tab-options__header-heading
@@ -2853,7 +2853,7 @@ function createDialogMenu(rootId, options) {
   return dialog[0]; //note: return native element, NOT jquery
 }
 
-function createDialogMenuTrigger(iconName, menuId, create) {
+function createDialogMenuTrigger(iconName, menuId, create, onShow) {
   const buttonId = uuid();
   const button = $(`<button id="${buttonId}" class="js-popup-trigger" width="100px" height="100px">
   <span class="material-symbols-outlined">${iconName}</span></button>`);
@@ -2864,22 +2864,19 @@ function createDialogMenuTrigger(iconName, menuId, create) {
       dialog.close();
     } else {
       //right now using show (but could decide that showModal is better)
+      if(onShow) onShow(e, dialog);
       dialog.show(); //so we can get dimensions 
       $(dialog).attr("data-content", buttonId) //remember triggering button
       const rect = $(e.target)[0].getBoundingClientRect();
-      const menuRect = $(dialog)[0].getBoundingClientRect(); // The Menu
+      const menuRect = $(dialog)[0].getBoundingClientRect();
       const winW = window.innerWidth;
       const winH = window.innerHeight;
-      let top = rect.bottom;
-      let left = rect.left;
-      if (top + menuRect.height > winH) {
-        top = rect.top - menuRect.height;
-      }
-      if (left + menuRect.width > winW) {
-        left = winW - menuRect.width - 10;
-      }
-      top = Math.max(10, top);
-      left = Math.max(10, left);
+      const top = Math.max(10, (rect.bottom + menuRect.height > winH) 
+        ? rect.top - menuRect.height 
+        : rect.bottom);
+      const left = Math.max(10, (rect.left + menuRect.width > winW) 
+        ? winW - menuRect.width - 10 
+        : rect.left);      
       $(dialog).css({
         position: 'fixed', // Stays put during scroll
         top: top + 'px',
@@ -2940,12 +2937,13 @@ function createSendPlayerMenu(menuId, target) {
       selected.toggleClass('js-popup--is-active');      
     }
   }
+  const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values()];
   const menu = createDialogMenu(menuId, [
     { id: "_send", label: "📩 Send To Log", callback: (e) => callback_with_selection(e, "send")},
     { id: "_pop", label: "⬆️ Popup", callback: (e) => callback_with_selection(e, "pop")},
-    { id: "_everyone", label: "🔁 Toggle All", callback: (e) => toggle_everyone(e, 2)},
-    { type: "hr" },    
-    ...window.playerUsers.map((p)=> {return { id: p.userId, label: p.userName, active: true }})
+    { id: "_everyone", label: "🔁 Toggle All", callback: (e) => toggle_everyone(e, 3)},
+    { type: "hr", label: "Users" },
+    ...users
   ]);
   $(menu).css
   $(target).closest('body').append(menu);
@@ -2953,10 +2951,14 @@ function createSendPlayerMenu(menuId, target) {
   return menu;
 }
 
-function createSendPlayerButton(parent, icon) {
+function createSendPlayerButton(parent, icon, hasPopupOption=false ) {
   const menuId = "send-player-menu";
-  const button = createDialogMenuTrigger(icon, menuId, createSendPlayerMenu);
+  const button = createDialogMenuTrigger(icon, menuId, createSendPlayerMenu, (e,dialog) => {
+    //hide/show popup option in shared menu
+    $($(dialog).find("button")[1]).css("display", hasPopupOption ? "" : "none");
+  });
   button.addClass("block-send-to-game-log");
+  if(hasPopupOption) button.addClass("has-popup-option");
   button.css("right", "2px"); //todo: temp so we see both buttons
   return button;
 }
