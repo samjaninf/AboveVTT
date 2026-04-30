@@ -2835,9 +2835,7 @@ function display_url_embeded(url){
 
 //+++ dialog menus in the style of top level tools
 // todo:
-// -- make menu construction on-demand? (reduce resources?)
-// -- make sure dialogs fit on screen (positioning)
-// -- more general options for dialog menus
+// -- more general options for dialog menus (when used beyond send-player buttons)
 function dialogMenuOption(rootId, container, opt) {
   if(opt.type === 'hr') {
     $(`<span class="js-popup-decoration">${opt.label || ""}</span>`).appendTo(container);      
@@ -2874,6 +2872,8 @@ function createDialogMenuTrigger(iconName, menuId, create, onShow) {
   <span class="material-symbols-outlined">${iconName}</span></button>`);
   button.on('click', (e) => {
     //create the dialog on first use
+    e.preventDefault();
+    e.stopPropagation();
     const dialog = $("#"+menuId, e.target.ownerDocument)?.[0] || create(menuId, e.target);
     if(dialog.open) {
       dialog.close();
@@ -2930,8 +2930,8 @@ function createSendPlayerMenu(menuId, target) {
       //todo: if selected is everyone then use undefined here:
       send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, selected);
     } else {
-      const imgSrc = $(".magnify")?.attr("src")
-      //todo: decide to send to everyone or iterate through users....
+      //todo: deal with video
+      const imgSrc = $(".magnify, .monster-image")?.attr("src")
       if(imgSrc) {
         window.MB.sendMessage('custom/myVTT/Popup',  {
           src: imgSrc,
@@ -2939,6 +2939,8 @@ function createSendPlayerMenu(menuId, target) {
           whisper: selected,
           from:window.PLAYER_ID
         });
+      } else {
+        console.error("Could not find image to pop", imgSrc);
       }
     }
     $(e.target).removeClass('js-popup--is-active');
@@ -2974,11 +2976,11 @@ function createSendPlayerButton(parent, icon, hasPopupOption=false ) {
     $($(dialog).find("button")[1]).css("display", hasPopupOption ? "" : "none");
   });
   button.addClass("block-send-to-game-log");
+  button.addClass("send-player-button")
   if(hasPopupOption) button.addClass("has-popup-option");
-  button.css("right", "2px"); //todo: temp so we see both buttons
   return button;
 }
-//--- dialog menus 
+//-end- dialog menus 
 
 function find_or_create_generic_draggable_window(id, titleBarText, addLoadingIndicator = true, addPopoutButton = false, popoutSelector=``, width='80%', height='80%', top='10%', left='10%', showSlow = true, cancelClasses='', hideOnX = false, alwaysDisplayTitle = false) {
   console.log(`find_or_create_generic_draggable_window id: ${id}, titleBarText: ${titleBarText}, addLoadingIndicator: ${addLoadingIndicator}, addPopoutButton: ${addPopoutButton}`);

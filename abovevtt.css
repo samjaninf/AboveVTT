@@ -14818,6 +14818,14 @@ button#displayedDiceFormulaExit:hover {
     left: -195px !important;
 }
 
+.send-player-button {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    background: #eee;
+    opacity: 0.5;
+}
+
 .js-popup-options {
     margin: 2px;
 }

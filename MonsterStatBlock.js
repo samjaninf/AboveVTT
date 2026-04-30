@@ -87,17 +87,19 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
       if(token.options.imgsrc.startsWith('above-bucket-not-a-url')){
         imageUrl = await getAvttStorageUrl(imageUrl);
       }
-      container.find(`.avtt-stat-block-container`).append(`<div class="image" style="display: block;"><${(token.options.videoToken == true || ['.mp4', '.webm', '.m4v'].some(d => token.options.imgsrc.includes(d))) ? 'video disableremoteplayback muted' : 'img'}
+      //todo: evaluate block -> inline-block change here.
+      container.find(`.avtt-stat-block-container`).append(`<div class="image" style="display: inline-block; position: relative;"><${(token.options.videoToken == true || ['.mp4', '.webm', '.m4v'].some(d => token.options.imgsrc.includes(d))) ? 'video disableremoteplayback muted' : 'img'}
             src="${imageUrl}"    
             class="monster-image"
             style="max-width: 100%;">
             </div>
             <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
                 <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${imageUrl}" target='_blank' >Send Image To Gamelog</a>
-                <a id="monster-image-popup-link" class="ddbeb-button monster-details-link" href="${imageUrl}" target='_blank' >Popup Image To Players</a>
-            </div>`);
+                </div>`);
     }
+  
     add_aoe_statblock_click(container, tokenId);
+    // todo: might get rid of this too
     container.find("#monster-image-to-gamelog-link").on("click", function (e) {
       e.stopPropagation();
       e.preventDefault();
@@ -106,21 +108,22 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
       imgContainer.find("img, video").addClass("magnify");
       send_html_to_gamelog(imgContainer[0].outerHTML);
     });
-    container.find("#monster-image-popup-link").on("click", function (e) { 
-      e.stopPropagation();
-      e.preventDefault();
-      const imgContainer = $(e.target).parent().prev();
-      popup = {
-        src: imgContainer.find("img, video").attr("src"),
-        timed: 10000,
-        from:window.PLAYER_ID
-      }
-      window.MB.sendMessage('custom/myVTT/Popup',  popup);
-    });
+
+  //todo: get rid of send to gamelog button above (as it's duplicate function)
+  //todo: fix layout
+  //todo: is this the right place? or do later in display?
+  container.find("img.monster-image, .monster-image").each((i,block) => {
+    createSendPlayerButton(block, "login", true).insertAfter(block);
+  });
   
+    //Note: this is async - that is why code below may not find image 
     if(!customStatBlock){
-      statBlock.imageHtml(token).then(imageHtml => { 
-        container.find("div.image").append(imageHtml); 
+      statBlock.imageHtml(token).then(imageHtml => {
+        //add in send-to features
+        container.find("div.image").append(imageHtml).find("img.monster-image").each((i,block) => {
+          //patch div so that we place correctly (todo: is there a better place to put this?)
+          createSendPlayerButton(block, "login", true).insertAfter(block);
+        });
       })
     }
       
@@ -131,6 +134,8 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
       add_ability_tracker_inputs(container, tokenId)
     // scan_creature_pane(container, statBlock.name, statBlock.image);
     add_stat_block_hover(container, tokenId);
+  
+    //todo: new sendtogamelog menu for these too?
     container.find("p>em>strong, p>strong>em, div>strong>em, div>em>strong, p>span>em>strong, p>span>strong>em").off("contextmenu.sendToGamelog").on("contextmenu.sendToGamelog", function (e) {
       e.preventDefault();
       if(e.altKey || e.shiftKey || (!isMac() && e.ctrlKey) || e.metaKey)
@@ -1769,8 +1774,8 @@ class MonsterStatBlock {
             el.parent().attr("data-title", `<a target='_blank' href='${nextUrl}' class='link link-full'>View Full Image</a>`);
         });
 
-
-      let html = $(`<a href="${imageSrc}" data-title="<a target='_blank' href='${imageSrc}' class='link link-full'>View Full Image</a>"
+      //todo: is inline-block correct here? 
+      let html = $(`<a href="${imageSrc}" style="display: inline-block; position: relative;" data-title="<a target='_blank' href='${imageSrc}' class='link link-full'>View Full Image</a>"
            target="_blank"></a>`);
         html.append(img);
         return html;
