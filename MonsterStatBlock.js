@@ -97,9 +97,9 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
   
     add_aoe_statblock_click(container, tokenId);
 
-  container.find("img.monster-image, .monster-image").each((i,block) => {
-    createSendPlayerButton(block, "login", true).insertAfter(block);
-  });
+    container.find("img.monster-image, .monster-image").each((i,block) => {
+      createSendPlayerButton(block, "login", true).insertAfter(block);
+    });
     //Note: this is async - that is why code just above here isn't lower down
     if(!customStatBlock){
       statBlock.imageHtml(token, statBlock.data.url).then(theImage => {
