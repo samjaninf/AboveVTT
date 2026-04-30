@@ -2848,12 +2848,14 @@ function dialogMenuOption(rootId, container, opt) {
     const button = $(`<button id='${rootId}_${opt.id}' class="js-popup-option${ttip} data-id='${opt.id}'>${icon}${opt.label}</button>`);
     //ddbc-tab-options__header-heading
     const callback = opt.callback;
+    const closeAfter = opt.closeAfter;
     if(opt.active) button.addClass("js-popup--is-active");
     button.on('click', function (e) {
       const buttonSelectedClasses = "js-popup--is-active"
       $(this).toggleClass(buttonSelectedClasses);
       e.preventDefault()
       if(callback) callback(e);
+      if(closeAfter) $(e.target).closest(".js-popup")?.[0]?.close();      
     });
     button.appendTo(container);
   }
@@ -2866,22 +2868,23 @@ function createDialogMenu(rootId, options) {
   return dialog[0]; //note: return native element, NOT jquery
 }
 
-function createDialogMenuTrigger(iconName, menuId, create, onShow) {
-  const buttonId = uuid();
-  const button = $(`<button id="${buttonId}" class="js-popup-trigger" width="100px" height="100px">
-  <span class="material-symbols-outlined">${iconName}</span></button>`);
-  button.on('click', (e) => {
+//turn an element into a menu trigger
+function makeDialogMenuTrigger(element, menuId, createMenu, onShow) {
+  const elementId = uuid(); //give it a uuid so we can find it later in menu code
+  element.attr('id', elementId);
+  element.addClass("js-popup-trigger")
+  element.off('click').on('click', (e) => {
     //create the dialog on first use
     e.preventDefault();
     e.stopPropagation();
-    const dialog = $("#"+menuId, e.target.ownerDocument)?.[0] || create(menuId, e.target);
+    const dialog = $("#"+menuId, e.target.ownerDocument)?.[0] || createMenu(menuId, e.target);
     if(dialog.open) {
       dialog.close();
     } else {
+      if(onShow) onShow(e, dialog, elementId); //before show callback
       //right now using show (but could decide that showModal is better)
-      if(onShow) onShow(e, dialog);
       dialog.show(); //so we can get dimensions 
-      $(dialog).attr("data-content", buttonId) //remember triggering button
+      $(dialog).attr("data-whichbutton", elementId) //remember who triggered
       const rect = $(e.target)[0].getBoundingClientRect();
       const menuRect = $(dialog)[0].getBoundingClientRect();
       const winW = window.innerWidth;
@@ -2899,7 +2902,7 @@ function createDialogMenuTrigger(iconName, menuId, create, onShow) {
       });
     }
   });
-  return button;
+  return element;
 }
 
 function dialogCloser(e, force) {
@@ -2922,7 +2925,7 @@ function createSendPlayerMenu(menuId, target) {
     const dialog = $(e.target).closest(".js-popup")?.[0];      
     const options = $(e.target).closest(".js-popup-options")?.[0];
     const selected = $(options).find('.js-popup--is-active').map((i, el) => el.getAttribute('data-id')).get().filter((a)=> !a.startsWith('_'));
-    const theTriggeringButton = $(`#${$(dialog).attr("data-content")}`);
+    const theTriggeringButton = $(`#${$(dialog).attr("data-whichbutton")}`);
     const targetBlock = $(theTriggeringButton).parent().clone();
     targetBlock.find('button.block-send-to-game-log').remove();
     targetBlock.find('img').removeAttr('width height style').toggleClass('magnify', true);
@@ -2957,8 +2960,8 @@ function createSendPlayerMenu(menuId, target) {
   }
   const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id: SPECTATOR_WHISPER_ID, label: "-Spectator-", active: true}];
   const menu = createDialogMenu(menuId, [
-    { id: "_send", label: "Send To Log", callback: (e) => callback_with_selection(e, "send"), icon: "login", tooltip: "Send to Gamelog of selected users"},
-    { id: "_pop", label: "Popup", icon: "toast", callback: (e) => callback_with_selection(e, "pop"), tooltip: "Popup a momentary image for selected users"},
+    { id: "_send", label: "Send To Log", callback: (e) => callback_with_selection(e, "send"), icon: "login", tooltip: "Send to Gamelog of selected users", closeAfter: true},
+    { id: "_pop", label: "Popup", icon: "toast", callback: (e) => callback_with_selection(e, "pop"), tooltip: "Popup a momentary image for selected users", closeAfter: true },
     { id: "_everyone", label: "Toggle All", icon: "toggle_on", callback: (e) => toggle_everyone(e, 3), tooltip: "Toggle user buttons below"},
     { type: "hr", label: "Users" },
     ...users
@@ -2969,15 +2972,16 @@ function createSendPlayerMenu(menuId, target) {
   return menu;
 }
 
+function setPlayerButtonSetPopupStatus(e, dialog, buttonId) {
+  const hasPopupOption = $("#"+buttonId).attr("data-haspopup");
+  $("#send-player-menu__pop", e.target.ownerDocument).css("display", hasPopupOption ? "" : "none"); 
+}
 function createSendPlayerButton(parent, icon, hasPopupOption=false ) {
-  const menuId = "send-player-menu";
-  const button = createDialogMenuTrigger(icon, menuId, createSendPlayerMenu, (e,dialog) => {
-    //hide/show popup option in shared menu
-    $($(dialog).find("button")[1]).css("display", hasPopupOption ? "" : "none");
-  });
+  const element = $(`<button width="100px" height="100px"> <span class="material-symbols-outlined">${icon}</span></button>`);
+  const button = makeDialogMenuTrigger(element, "send-player-menu", createSendPlayerMenu, setPlayerButtonSetPopupStatus);
+  if(hasPopupOption) button.attr("data-haspopup", "1");
   button.addClass("block-send-to-game-log");
   button.addClass("send-player-button")
-  if(hasPopupOption) button.addClass("has-popup-option");
   return button;
 }
 //-end- dialog menus 
