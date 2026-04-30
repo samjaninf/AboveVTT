@@ -2869,11 +2869,11 @@ function createDialogMenu(rootId, options) {
 }
 
 //turn an element into a menu trigger
-function makeDialogMenuTrigger(element, menuId, createMenu, onShow) {
+function makeDialogMenuTrigger(element, trigger, menuId, createMenu, onShow) {
   const elementId = uuid(); //give it a uuid so we can find it later in menu code
   element.attr('id', elementId);
   element.addClass("js-popup-trigger")
-  element.off('click').on('click', (e) => {
+  element.off(trigger).on(trigger, (e) => {
     //create the dialog on first use
     e.preventDefault();
     e.stopPropagation();
@@ -2910,13 +2910,32 @@ function dialogCloser(e, force) {
     const isClickInside = menu.contains(e.target);
     const isTriggerClick = e.target.closest('.js-popup-trigger');
     const isClickOnChild = menu.contains(e.target);
-    console.log("CLose?", force, menu, isClickInside, isTriggerClick, isClickOnChild);
     if (!isClickInside && !isTriggerClick && !isClickOnChild || force) menu.close();
   });
 }
 function addDialogCloser(element) {
   //named function so multiple event listeners don't happen  
   element.ownerDocument.addEventListener('mousedown', dialogCloser);
+}
+
+
+function sendClonedElement(element, whisper, popInstead) {
+  const targetBlock = $(element).clone();
+  targetBlock.find('button.block-send-to-game-log').remove();
+  targetBlock.find('img').removeAttr('width height style').toggleClass('magnify', true);
+  if(popInstead) {
+      //todo: deal with video
+      const imgSrc = targetBlock.find(".magnify, .monster-image")?.attr("src")
+    if(imgSrc) {
+      const msg = { src: imgSrc, timed: 10000, from:window.PLAYER_ID };
+      if(whisper) msg.whisper = whisper;
+      window.MB.sendMessage('custom/myVTT/Popup',  msg);
+    } else {
+      console.error("Could not find image to pop", imgSrc);
+    }
+  } else {
+    send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, whisper);
+  }
 }
 
 function createSendPlayerMenu(menuId, target) {
@@ -2926,26 +2945,8 @@ function createSendPlayerMenu(menuId, target) {
     const options = $(e.target).closest(".js-popup-options")?.[0];
     const selected = $(options).find('.js-popup--is-active').map((i, el) => el.getAttribute('data-id')).get().filter((a)=> !a.startsWith('_'));
     const theTriggeringButton = $(`#${$(dialog).attr("data-whichbutton")}`);
-    const targetBlock = $(theTriggeringButton).parent().clone();
-    targetBlock.find('button.block-send-to-game-log').remove();
-    targetBlock.find('img').removeAttr('width height style').toggleClass('magnify', true);
-    if(verb === 'send') {
-      //todo: if selected is everyone then use undefined here:
-      send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, selected);
-    } else {
-      //todo: deal with video
-      const imgSrc = $(".magnify, .monster-image")?.attr("src")
-      if(imgSrc) {
-        window.MB.sendMessage('custom/myVTT/Popup',  {
-          src: imgSrc,
-          timed: 10000,
-          whisper: selected,
-          from:window.PLAYER_ID
-        });
-      } else {
-        console.error("Could not find image to pop", imgSrc);
-      }
-    }
+    //todo: if selected is everyone then use undefined here:    
+    sendClonedElement(theTriggeringButton.parent(), selected, verb === 'pop');
     $(e.target).removeClass('js-popup--is-active');
   };
   const toggle_everyone = (e, skipCount) => {
@@ -2966,7 +2967,6 @@ function createSendPlayerMenu(menuId, target) {
     { type: "hr", label: "Users" },
     ...users
   ]);
-  $(menu).css
   $(target).closest('body').append(menu);
   addDialogCloser(target);
   return menu;
@@ -2977,8 +2977,13 @@ function setPlayerButtonSetPopupStatus(e, dialog, buttonId) {
   $("#send-player-menu__pop", e.target.ownerDocument).css("display", hasPopupOption ? "" : "none"); 
 }
 function createSendPlayerButton(parent, icon, hasPopupOption=false ) {
-  const element = $(`<button width="100px" height="100px"> <span class="material-symbols-outlined">${icon}</span></button>`);
-  const button = makeDialogMenuTrigger(element, "send-player-menu", createSendPlayerMenu, setPlayerButtonSetPopupStatus);
+  const element = $(`<button width="200px" height="200px"> <span class="material-symbols-outlined">${icon}</span></button>`);
+  const button = makeDialogMenuTrigger(element, 'contextmenu', "send-player-menu", createSendPlayerMenu, setPlayerButtonSetPopupStatus);
+  button.off('click').on('click', (e)=> {
+    e.preventDefault();
+    e.stopPropagation();
+    sendClonedElement($(e.target).closest("button").parent());
+  });
   if(hasPopupOption) button.attr("data-haspopup", "1");
   button.addClass("block-send-to-game-log");
   button.addClass("send-player-button")

@@ -92,22 +92,10 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
             src="${imageUrl}"    
             class="monster-image"
             style="max-width: 100%;">
-            </div>
-            <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
-                <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${imageUrl}" target='_blank' >Send Image To Gamelog</a>
-                </div>`);
+            </div>`);
     }
   
     add_aoe_statblock_click(container, tokenId);
-    // todo: might get rid of this too
-    container.find("#monster-image-to-gamelog-link").on("click", function (e) {
-      e.stopPropagation();
-      e.preventDefault();
-      const imgContainer = $(e.target).parent().prev();
-      imgContainer.find("img, video").attr("href", imgContainer.find("img, video").attr("src"));
-      imgContainer.find("img, video").addClass("magnify");
-      send_html_to_gamelog(imgContainer[0].outerHTML);
-    });
 
   //todo: get rid of send to gamelog button above (as it's duplicate function)
   //todo: fix layout
@@ -118,9 +106,9 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
   
     //Note: this is async - that is why code below may not find image 
     if(!customStatBlock){
-      statBlock.imageHtml(token).then(imageHtml => {
+      statBlock.imageHtml(token, statBlock.data.url).then(theImage => {
         //add in send-to features
-        container.find("div.image").append(imageHtml).find("img.monster-image").each((i,block) => {
+        container.find("div.image").append(theImage).find("img.monster-image").each((i,block) => {
           //patch div so that we place correctly (todo: is there a better place to put this?)
           createSendPlayerButton(block, "login", true).insertAfter(block);
         });
@@ -482,12 +470,6 @@ async function build_monster_stat_block(statBlock, token) {
                             
                             
                   <div class="image" style="display: block;"></div>
-                  <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
-                      <a class="ddbeb-button monster-details-link" href="${statBlock.data.url}" target='_blank' >View Details Page</a>
-                      <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${image}" target='_blank' >Send Image To Gamelog</a>
-                      <a id="monster-image-popup-link" class="ddbeb-button monster-details-link" href="${image}" target='_blank' >Popup Image To Players</a>
-                  </div>
-
 
                   <div class="more-info-content" style="padding:10px;">
 
@@ -778,12 +760,6 @@ async function build_monster_stat_block(statBlock, token) {
 
 
                 <div class="image" style="display: block;"></div>
-                <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
-                    <a class="ddbeb-button monster-details-link" href="${statBlock.data.url}" target='_blank' >View Details</a>
-                    <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${image}" target='_blank' >Send Image To Gamelog</a>
-                      <a id="monster-image-popup-link" class="ddbeb-button monster-details-link" href="${image}" target='_blank' >Popup Image To Players</a>    
-                </div>
-
 
                 <div class="more-info-content" style="padding:10px;">
 
@@ -1723,7 +1699,7 @@ class MonsterStatBlock {
         return hidemeHack;
     }
 
-    async imageHtml(token) {
+    async imageHtml(token, statsUrl) {
         // const url = this.findBestAvatarUrl();
         const imageSrc = token?.options?.imgsrc?.startsWith('above-bucket-not-a-url') ? 
           await getAvttStorageUrl(token.options.imgsrc) : 
@@ -1774,9 +1750,10 @@ class MonsterStatBlock {
             el.parent().attr("data-title", `<a target='_blank' href='${nextUrl}' class='link link-full'>View Full Image</a>`);
         });
 
-      //todo: is inline-block correct here? 
-      let html = $(`<a href="${imageSrc}" style="display: inline-block; position: relative;" data-title="<a target='_blank' href='${imageSrc}' class='link link-full'>View Full Image</a>"
-           target="_blank"></a>`);
+      //todo change imageSrc -> statBlock.data.url
+      let html = $(`<a href="${statsUrl}" style="display: inline-block; position: relative;"
+                    data-title="<a target='_blank' href='${statsUrl}' class='link link-full'>View Statblock</a>"
+                    target="_blank"></a>`);
         html.append(img);
         return html;
     }

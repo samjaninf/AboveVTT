@@ -2261,8 +2261,6 @@ class JournalManager{
 		blocks.each((i, block) => {
 			createSendPlayerButton(block, "login", block instanceof HTMLImageElement).insertAfter(block);			
 		});
-		//todo: decide if we like new method and cleanup this old one
-		//sendToGamelogButton.clone(true, true).insertAfter(blocks);
 
 		const tables = target.find('table');
 		const allDiceRegex = /(\d+)?d(?:100|20|12|10|8|6|4)((?:kh|kl|ro(<|<=|>|>=|=)|min=)\d+)*/g; // ([numbers]d[diceTypes]kh[numbers] or [numbers]d[diceTypes]kl[numbers]) or [numbers]d[diceTypes]
@@ -2272,7 +2270,6 @@ class JournalManager{
 				'position': 'relative',
 				'padding-right': '10px'
 			});
-			//result.append(sendToGamelogButton.clone(true, true));
 			result.each((i, block) =>
 				block.append(createSendPlayerButton(block, "login")));
 		}
