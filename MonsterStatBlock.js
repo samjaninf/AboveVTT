@@ -105,7 +105,6 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
       statBlock.imageHtml(token, statBlock.data.url).then(theImage => {
         //add in send-to features
         container.find("div.image").append(theImage).find("img.monster-image").each((i,block) => {
-          //patch div so that we place correctly (todo: is there a better place to put this?)
           createSendPlayerButton(block, "login", true).insertAfter(block);
         });
       })
