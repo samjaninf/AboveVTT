@@ -2985,9 +2985,7 @@ function createSendPlayerButton(parent, icon, hasPopupOption=false ) {
     sendClonedElement($(e.target).closest("button").parent());
   });
   if(hasPopupOption) button.attr("data-haspopup", "1");
-  //todo: evaluate stuff in this style:
   button.addClass("block-send-to-game-log");
-  button.addClass("send-player-button")
   return button;
 }
 //-end- dialog menus 

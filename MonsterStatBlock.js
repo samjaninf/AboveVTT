@@ -102,7 +102,7 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
     });
     //Note: this is async - that is why code just above here isn't lower down
     if(!customStatBlock){
-      statBlock.imageHtml(token, statBlock.data.url).then(theImage => {
+      statBlock.imageHtml(token).then(theImage => {
         //add in send-to features
         container.find("div.image").append(theImage).find("img.monster-image").each((i,block) => {
           createSendPlayerButton(block, "login", true).insertAfter(block);
@@ -1694,7 +1694,7 @@ class MonsterStatBlock {
         return hidemeHack;
     }
 
-    async imageHtml(token, statsUrl) {
+    async imageHtml(token) {
         // const url = this.findBestAvatarUrl();
         const imageSrc = token?.options?.imgsrc?.startsWith('above-bucket-not-a-url') ? 
           await getAvttStorageUrl(token.options.imgsrc) : 
@@ -1741,16 +1741,11 @@ class MonsterStatBlock {
             }
             console.log("imageHtml failed to load image. Trying nextUrl", nextUrl, el, e);
             el.attr("src", nextUrl);
-            el.parent().attr("href", nextUrl);
-            el.parent().attr("data-title", `<a target='_blank' href='${nextUrl}' class='link link-full'>View Full Image</a>`);
-        });
-
-      //todo change imageSrc -> statBlock.data.url
-      let html = $(`<a href="${statsUrl}" style="display: inline-block; position: relative;"
-                    data-title="<a target='_blank' href='${statsUrl}' class='link link-full'>View Statblock</a>"
-                    target="_blank"></a>`);
-        html.append(img);
-        return html;
+         });
+      
+      const html = $(`<div style="display: inline-block; position: relative;"></div>`);
+      html.append(img);
+      return html;
     }
 }
 
