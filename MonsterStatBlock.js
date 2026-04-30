@@ -97,14 +97,10 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
   
     add_aoe_statblock_click(container, tokenId);
 
-  //todo: get rid of send to gamelog button above (as it's duplicate function)
-  //todo: fix layout
-  //todo: is this the right place? or do later in display?
   container.find("img.monster-image, .monster-image").each((i,block) => {
     createSendPlayerButton(block, "login", true).insertAfter(block);
   });
-  
-    //Note: this is async - that is why code below may not find image 
+    //Note: this is async - that is why code just above here isn't lower down
     if(!customStatBlock){
       statBlock.imageHtml(token, statBlock.data.url).then(theImage => {
         //add in send-to features
