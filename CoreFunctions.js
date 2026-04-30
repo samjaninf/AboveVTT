@@ -2841,11 +2841,9 @@ function dialogMenuOption(rootId, container, opt) {
     $(`<span class="js-popup-decoration">${opt.label || ""}</span>`).appendTo(container);      
   } else {
     const icon = opt.icon ? `<span class="material-symbols-outlined" style="font-size: inherit;">${opt.icon}</span>` : "";
-    // this method has some spacing issues:
-    // const ttip = opt.tooltip ? ` hasTooltip" data-name="${opt.tooltip}"` : '"';
-    // so doing old school for now:
-    const ttip = opt.tooltip ? `" title="${opt.tooltip}"` : '"';    
-    const button = $(`<button id='${rootId}_${opt.id}' class="js-popup-option${ttip} data-id='${opt.id}'>${icon}${opt.label}</button>`);
+    // hasTooltip style has some layout issues so doing old school for now:
+    const button = $(`<button id='${rootId}_${opt.id}' class="js-popup-option" data-id='${opt.id}'>${icon}${opt.label}</button>`);
+    if(opt.tooltip) button.attr('title', opt.tooltip)
     //ddbc-tab-options__header-heading
     const callback = opt.callback;
     const closeAfter = opt.closeAfter;
@@ -2914,10 +2912,13 @@ function dialogCloser(e, force) {
   });
 }
 function addDialogCloser(element) {
-  //named function so multiple event listeners don't happen  
-  element.ownerDocument.addEventListener('mousedown', dialogCloser);
+  const doc = element.ownerDocument;
+  //even tho named function so multiple event listeners shouldn't happen
+  //attempt to optimize
+  if (doc._hasDialogCloser) return;
+  doc.addEventListener('mousedown', dialogCloser);
+  doc._hasDialogCloser = true;
 }
-
 
 function sendClonedElement(element, whisper, popInstead) {
   const targetBlock = $(element).clone();
