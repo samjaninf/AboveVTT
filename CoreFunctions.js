@@ -2843,7 +2843,11 @@ function dialogMenuOption(rootId, container, opt) {
     $(`<span class="js-popup-decoration">${opt.label || ""}</span>`).appendTo(container);      
   } else {
     const icon = opt.icon ? `<span class="material-symbols-outlined" style="font-size: inherit;">${opt.icon}</span>` : "";
-    const button = $(`<button id='${rootId}_${opt.id}' class='js-popup-option' data-id='${opt.id}'>${icon}${opt.label}</button>`);
+    // this method has some spacing issues:
+    // const ttip = opt.tooltip ? ` hasTooltip" data-name="${opt.tooltip}"` : '"';
+    // so doing old school for now:
+    const ttip = opt.tooltip ? `" title="${opt.tooltip}"` : '"';    
+    const button = $(`<button id='${rootId}_${opt.id}' class="js-popup-option${ttip} data-id='${opt.id}'>${icon}${opt.label}</button>`);
     //ddbc-tab-options__header-heading
     const callback = opt.callback;
     if(opt.active) button.addClass("js-popup--is-active");
@@ -2951,9 +2955,9 @@ function createSendPlayerMenu(menuId, target) {
   }
   const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id: SPECTATOR_WHISPER_ID, label: "-Spectator-", active: true}];
   const menu = createDialogMenu(menuId, [
-    { id: "_send", label: "Send To Log", callback: (e) => callback_with_selection(e, "send"), icon: "login"},
-    { id: "_pop", label: "Popup", icon: "toast", callback: (e) => callback_with_selection(e, "pop")},
-    { id: "_everyone", label: "Toggle All", icon: "toggle_on", callback: (e) => toggle_everyone(e, 3)},
+    { id: "_send", label: "Send To Log", callback: (e) => callback_with_selection(e, "send"), icon: "login", tooltip: "Send to Gamelog of selected users"},
+    { id: "_pop", label: "Popup", icon: "toast", callback: (e) => callback_with_selection(e, "pop"), tooltip: "Popup a momentary image for selected users"},
+    { id: "_everyone", label: "Toggle All", icon: "toggle_on", callback: (e) => toggle_everyone(e, 3), tooltip: "Toggle user buttons below"},
     { type: "hr", label: "Users" },
     ...users
   ]);
