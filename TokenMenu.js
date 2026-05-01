@@ -204,12 +204,22 @@ function token_context_menu_expanded(tokenIds, e) {
 						feet: 0,
 						color: `rgba(0, 0, 0, 0)`
 					},
+					devilsight:{
+						feet: 0,
+						color: `rgba(0, 0, 0, 0)`
+					},
+					truesight:{
+						feet: 0,
+						color: `rgba(0, 0, 0, 0)`
+					},
 					imgsrc: `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=`,
 					type: 'door',
 					size: 50,
 					scaleCreated: window.CURRENT_SCENE_DATA.scale_factor,
-					auraislight: false
+					auraislight: false,
+					alwaysshowname: window.TOKEN_SETTINGS.alwaysshowname != undefined ? window.TOKEN_SETTINGS.alwaysshowname : false
 				};
+
 				window.ScenesHandler.create_update_token(options)
 			}
 			if(!isTeleporter){
@@ -500,8 +510,7 @@ function token_context_menu_expanded(tokenIds, e) {
 
 			}
 
-
-
+	
 			let notesRow = $(`<div class="token-image-modal-footer-select-wrapper flyout-from-menu-item"><div class="token-image-modal-footer-title">Note</div></div>`);
 			notesRow.hover(function (hoverEvent) {
 				context_menu_flyout("notes-flyout", hoverEvent, function(flyout) {
@@ -538,7 +547,56 @@ function token_context_menu_expanded(tokenIds, e) {
             let color = doors[0][2];
             let isOpen = (/rgba.*0\.5\)/g).test(color) ? 'open' : 'closed';
 
-            
+        	
+			let tokenName = window.TOKEN_OBJECTS[tokenIds].options.name;
+			let nameInput = $(`<input title="Token Name" placeholder="Name" name="name" type="text" />`);
+
+			nameInput.val(tokenName);
+
+			nameInput.on('keyup', function(event) {
+				let newName = event.target.value;
+				if (event.key == "Enter" && newName !== undefined && newName.length > 0) {
+					if(window.JOURNAL.notes[tokenIds]){
+						window.JOURNAL.notes[tokenIds].title = newName;
+						window.JOURNAL.persist();
+					}
+					window.TOKEN_OBJECTS[tokenIds].options.name = newName;
+					window.TOKEN_OBJECTS[tokenIds].place_sync_persist();
+				}
+			});
+			nameInput.on('focusout', function(event) {
+				let newName = event.target.value;
+				if (newName !== undefined && newName.length > 0) {	
+					if(window.JOURNAL.notes[tokenIds]){
+						window.JOURNAL.notes[tokenIds].title = newName;
+						window.JOURNAL.persist();
+					}
+					window.TOKEN_OBJECTS[tokenIds].options.name = newName;
+					window.TOKEN_OBJECTS[tokenIds].place_sync_persist();		
+				}
+			});
+			let nameWrapper = $(`
+				<div class="token-image-modal-url-label-wrapper">
+					<div class="token-image-modal-footer-title">Name</div>
+				</div>
+			`);
+			nameWrapper.append(nameInput); // input below label
+			
+			body.append(nameWrapper);
+			const setting = token_setting_options().filter((d) => d.name == 'alwaysshowname')[0];
+		
+			let currentValue = window.TOKEN_OBJECTS[tokenIds].options[setting.name];			
+			
+		
+			let inputWrapper = build_toggle_input(setting, currentValue, function (name, newValue) {
+				tokens.forEach(token => {
+					token.options[name] = newValue;
+					token.place_sync_persist();
+				});
+			});
+			
+			body.append(inputWrapper);
+				
 
             body.append($('<div class="token-image-modal-footer-title" style="margin-top:10px">Door Type</div>'));
 
@@ -2111,7 +2169,7 @@ function build_token_light_inputs(tokenIds, door=false) {
 	const aura2Color = tokens.map(t => t.options.light2.color);
 	const uniqueAura2Color = aura2Color.length === 1 ? aura2Color[0] : window.TOKEN_SETTINGS?.light2?.color ? window.TOKEN_SETTINGS.light2.color : "";
 	const visionFeet = tokens.map(t => t.options.vision.feet);
-	const uniqueVisionFeet = visionFeet.length === 1 ? visionFeet[0] : "";
+	const uniqueVisionFeet = visionFeet.length === 1 ? visionFeet[0] : "0";
 	const visionColor = tokens.map(t => t.options.vision.color);
 	const uniqueVisionColor = visionColor.length === 1 ? visionColor[0] : window.TOKEN_SETTINGS?.vision?.color ? window.TOKEN_SETTINGS.vision.color : "";
 	
@@ -2119,7 +2177,7 @@ function build_token_light_inputs(tokenIds, door=false) {
 	const devilsightFeet = tokens.map(t => t.options.devilsight.feet);
 	const uniqueDevilsightFeet = devilsightFeet.length === 1 ? devilsightFeet[0] : "";
 	const devilsightColor = tokens.map(t => t.options.devilsight.color);
-	const uniqueDevilsightColor = devilsightColor.length === 1 ? devilsightColor[0] : window.TOKEN_SETTINGS?.devilsight?.color ? window.TOKEN_SETTINGS.devilsight.color : "";
+	const uniqueDevilsightColor = devilsightColor.length === 1  ? devilsightColor[0] : window.TOKEN_SETTINGS?.devilsight?.color ? window.TOKEN_SETTINGS.devilsight.color : "";
 
 	const truesightFeet = tokens.map(t => t.options.truesight.feet);
 	const uniqueTruesightFeet = truesightFeet.length === 1 ? truesightFeet[0] : "";
