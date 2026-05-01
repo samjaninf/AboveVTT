@@ -2265,7 +2265,9 @@ class Token {
 					this.options.size = 50;
 					if (this.options.name) {
 						old.attr("data-name", this.options.name);
-					}		
+					}else{
+						old.removeAttr("data-name")
+					}
 					old.attr("data-always-show-name", this.options.alwaysshowname && this.options.name?.length>0);				
 					setTokenLight(old, this.options);
 					redraw_light();
@@ -2830,7 +2832,9 @@ class Token {
 					this.options.size = 50;
 					if (this.options.name) {
 						tok.attr("data-name", this.options.name);
-					}				
+					}else{
+						tok.removeAttr("data-name")
+					}		
 					tok.attr("data-always-show-name", this.options.alwaysshowname && this.options.name?.length>0);				
 					setTokenLight(tok, this.options);
 					redraw_light();
