@@ -226,13 +226,13 @@ body > div {
 .party-item-table td.item-add-cell{
     min-width: 90px;
 }
-.note-text .ct-currency-button__currency-item-preview{
+:is(.note-text, .avtt-stat-block-container) .party-currency .ct-currency-button__currency-item-preview{
     width:16px;
     height:16px;
     position:relative;
     display:inline-block;
 }
-.note-text .party-currency {
+:is(.note-text, .avtt-stat-block-container) .party-currency {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6317,6 +6317,7 @@ span.exhaustion-pip.last{
     right: 0px;
     bottom: 0px;
     background: rgb(235, 241, 245);
+    z-index: 10;
     /* easy debugging */
     /* opacity: 0.5; */
 }
@@ -12241,6 +12242,7 @@ div#playlistFields {
     border-style: solid; 
     margin-right: 3px;
     font-size:20px;
+    text-indent: 20px;
 }
 
 #chat-language option {

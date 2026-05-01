@@ -686,7 +686,7 @@ function deleteDB(){
     objectStoreRequest.onsuccess = function(event) {       
       $('#exploredCanvas').remove();
       redraw_light();
-      alert('This campaigns local explored vision data has been cleared.')
+      showTempMessage('This campaigns local explored vision data has been cleared.')
     };
   }
 }
@@ -707,7 +707,7 @@ function deleteExploredScene(sceneId){
       if(sceneId == window.CURRENT_SCENE_DATA.id){
         $('#exploredCanvas').remove();
         redraw_light();
-        alert('Scene Explore Trail Data Cleared')
+        showTempMessage('Scene Explore Trail Data Cleared')
       }        
     };
 }
@@ -1498,30 +1498,22 @@ function showErrorMessage(error, ...extraInfo) {
   
   const extraStrings = extraInfo.map(ei => {
     if (typeof ei === "object") {
-      if(JSON.stringify(ei).length>300)
-        return JSON.stringify(ei).substr(0, 300) + "...";
-      else
-        return JSON.stringify(ei)
+      return JSON.stringify(ei)
     } else {
-      if(ei?.toString().length>300)
-        return ei?.toString().substr(0, 300) + "...";
-      else
-        return ei?.toString()
+      return ei?.toString()
     }
   }).join('<br />');
   if(typeof error.message == 'object'){
     error.message = JSON.strigify(error.message);
   }
   let container = $("#above-vtt-error-message");
-  if(error.message.length > 300)
-    error.message = error.message.substr(0, 300) + "...";
   if ($('#error-message-stack').length == 0) {
     $("#above-vtt-error-message").remove();
     const container = $(`
       <div id="above-vtt-error-message">
         <h2>An unexpected error occurred!</h2>
         <h3 id="error-message">${error.message}</h3>
-        <div id="error-message-details">${extraStrings}</div>
+        <div id="error-message-details" style="max-height: 200px; overflow-y: auto;">${extraStrings}</div>
         <pre id="error-message-stack" style='max-height: 200px;'>${error.message}<br/>${extraStrings}</pre>
         <div id="error-github-issue"></div>
         <div class="error-message-buttons">
@@ -2210,6 +2202,13 @@ function store_campaign_info() {
   const campaignSecret = window.CAMPAIGN_SECRET;
   if (typeof campaignId !== "string" || campaignId.length <= 0) return;
   if (typeof campaignSecret !== "string" || campaignSecret.length <= 0) return;
+  // save all previous compaign secrets for later restoration
+  const previous = read_campaign_info(campaignId);
+  if(previous) {
+    if(previous === campaignSecret) return; //short circuit - no need to write
+    const previousPrevious = localStorage.getItem(`AVTT-CampaignInfo-${campaignId}-previous`) || "";
+    localStorage.setItem(`AVTT-CampaignInfo-${campaignId}-previous`, previousPrevious ? `${previous},${previousPrevious}` : previous);
+  }
   localStorage.setItem(`AVTT-CampaignInfo-${campaignId}`, campaignSecret);
 }
 
@@ -2225,6 +2224,7 @@ function read_campaign_info(campaignId) {
 /** @param {string} campaignId the DDB id of the campaign */
 function remove_campaign_info(campaignId) {
   localStorage.removeItem(`AVTT-CampaignInfo-${campaignId}`);
+  //todo: remove -previous as well?
 }
 
 // Low res thumbnails have the form https://www.dndbeyond.com/avatars/thumbnails/17/212/60/60/636377840850178381.jpeg
