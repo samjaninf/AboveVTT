@@ -1927,7 +1927,8 @@ div#scene_properties form > div{
 #adjustments-flyout>div>button.token-wall-poly-button.visible{
     display:block;
 }
-.hasTooltip::after {
+.hasTooltip::after,
+.door-button[data-name]::after {
     content: attr(data-name);
     -webkit-font-smoothing: antialiased;
     margin: 0 auto;
@@ -1944,6 +1945,7 @@ div#scene_properties form > div{
 }
 
 .hasTooltip::after,
+.door-button[data-name]::after,
 .sidebar-hover-text-flyout{
   pointer-events: none;
 }
@@ -1980,7 +1982,8 @@ div#scene_properties form > div{
     transition: 0.1s ease-in-out 0.2s;
 }
 
-.hasTooltip.VTTToken::after {
+.hasTooltip.VTTToken::after,
+.door-button[data-name]::after {
     position: absolute;
     z-index: 4;
     left: 50%;
@@ -1990,6 +1993,11 @@ div#scene_properties form > div{
     bottom: calc(-1 * (var(--font-size-zoom) + var(--font-size-zoom) / 1.5));
     transform: translate(-50%);
     pointer-events: none;
+}
+.door-button[data-name]::after{
+    --door-font-size-zoom: calc(var(--font-size-zoom) / var(--scene-scale));
+    font-size: var(--door-font-size-zoom);
+    bottom: calc(-1 * (var(--door-font-size-zoom) + var(--door-font-size-zoom) / 1.5));
 }
 
 
@@ -2010,6 +2018,7 @@ div#scene_properties form > div{
 }
 
 .hasTooltip:not(.drawbutton):hover:after,
+.door-button[data-name]:hover:after,
 .mobileAVTTUI .drawbutton.hasTooltip:hover:after {
     opacity: 1;
     visibility: visible;
@@ -2062,7 +2071,9 @@ padding-bottom: 5px;
 }
 
 .labelToken.hasTooltip:after,
-.labelToken.hasTooltip:hover:after{
+.labelToken.hasTooltip:hover:after,
+.door-button[data-name][data-always-show-name='true']:hover:after,
+.door-button[data-name][data-always-show-name='true']:after{
      content: attr(data-name);
     opacity: 1;
     background: none;

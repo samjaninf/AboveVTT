@@ -2171,7 +2171,8 @@ class Token {
 							vision[pcSenses[name]] = range;
 					}
 			}
-			else if(this.isMonster()){
+		}
+		else if(this.isMonster()){
 				if(window.monsterListItems){
 					let monsterSidebarListItem = this.options.monster == "open5e" ? window.open5eListItems.filter((d) => this.options.itemId == d.id)[0] : window.monsterListItems.filter((d) => this.options.monster == d.id)[0] ;	
 					if(!monsterSidebarListItem){
@@ -2187,27 +2188,27 @@ class Token {
 						vision = get_monster_senses(monsterSidebarListItem.monsterData.senses)
 					}
 				} 
-			}
+		}
 
-			if(this.options.vision?.feet == undefined){
-				this.options.vision = {
-					feet: vision.darkvision.toString(),
-					color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
-				}
-			}
-			if(this.options.truesight?.feet == undefined){
-				this.options.truesight = {
-					feet: vision.truesight.toString(),
-					color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
-				}
-			}
-			if(this.options.devilsight?.feet == undefined){
-				this.options.devilsight = {
-					feet: vision.devilsight.toString(),
-					color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
-				}
+		if(this.options.vision?.feet == undefined){
+			this.options.vision = {
+				feet: vision.darkvision.toString(),
+				color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
 			}
 		}
+		if(this.options.truesight?.feet == undefined){
+			this.options.truesight = {
+				feet: vision.truesight.toString(),
+				color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
+			}
+		}
+		if(this.options.devilsight?.feet == undefined){
+			this.options.devilsight = {
+				feet: vision.devilsight.toString(),
+				color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
+			}
+		}
+		
 
 	}
 	place(animationDuration) {
@@ -2262,7 +2263,10 @@ class Token {
 				
 				if(this.options.type == 'door'){
 					this.options.size = 50;
-					
+					if (this.options.name) {
+						old.attr("data-name", this.options.name);
+					}		
+					old.attr("data-always-show-name", this.options.alwaysshowname && this.options.name?.length>0);				
 					setTokenLight(old, this.options);
 					redraw_light();
 					door_note_icon(this.options.id);
@@ -2824,6 +2828,10 @@ class Token {
 
 				if(this.options.type == 'door'){
 					this.options.size = 50;
+					if (this.options.name) {
+						tok.attr("data-name", this.options.name);
+					}				
+					tok.attr("data-always-show-name", this.options.alwaysshowname && this.options.name?.length>0);				
 					setTokenLight(tok, this.options);
 					redraw_light();
 					door_note_icon(this.options.id);
@@ -4652,7 +4660,7 @@ function setTokenBase(token, options) {
 	}
 
 	
-	token.toggleClass('labelToken', (options.tokenStyleSelect == 'labelToken' || options.alwaysshowname == true ));
+	token.toggleClass('labelToken', (options.tokenStyleSelect == 'f' || options.alwaysshowname == true ));
 
 
 	if(options.tokenStyleSelect != 'definitelyNotAToken'){
