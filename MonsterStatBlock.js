@@ -104,7 +104,7 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
     if(!customStatBlock){
       statBlock.imageHtml(token).then(theImage => {
         //add in send-to features
-        container.find("div.image").append(theImage).find("img.monster-image").each((i,block) => {
+        container.find("div.image").append(theImage).find("img.monster-image, video").each((i,block) => {
           createSendPlayerButton(block, "login", true).insertAfter(block);
         });
       })

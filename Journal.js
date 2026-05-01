@@ -2245,7 +2245,7 @@ class JournalManager{
 	    }
 	}
 	block_send_to_buttons(target){
-		const blocks = target.find('img:not(.mon-stat-block__separator-img), .text--quote-box, .rules-text, .block-torn-paper, .read-aloud-text, .dmScreenChunk')
+		const blocks = target.find('img:not(.mon-stat-block__separator-img), video, .text--quote-box, .rules-text, .block-torn-paper, .read-aloud-text, .dmScreenChunk')
 
    		blocks.wrap(function(i){
 			const container = $(`<div class='note-text' style='position:relative;max-width: 100%;'></div>`)
