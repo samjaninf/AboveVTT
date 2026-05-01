@@ -554,8 +554,8 @@ function token_context_menu_expanded(tokenIds, e) {
 			nameInput.val(tokenName);
 
 			nameInput.on('keyup', function(event) {
-				let newName = event.target.value;
-				if (event.key == "Enter" && newName !== undefined && newName.length > 0) {
+				let newName = event.target.value !== undefined && event.target.value.length > 0 ? event.target.value : '';
+				if (event.key == "Enter") {
 					if(window.JOURNAL.notes[tokenIds]){
 						window.JOURNAL.notes[tokenIds].title = newName;
 						window.JOURNAL.persist();
@@ -565,15 +565,13 @@ function token_context_menu_expanded(tokenIds, e) {
 				}
 			});
 			nameInput.on('focusout', function(event) {
-				let newName = event.target.value;
-				if (newName !== undefined && newName.length > 0) {	
-					if(window.JOURNAL.notes[tokenIds]){
-						window.JOURNAL.notes[tokenIds].title = newName;
-						window.JOURNAL.persist();
-					}
-					window.TOKEN_OBJECTS[tokenIds].options.name = newName;
-					window.TOKEN_OBJECTS[tokenIds].place_sync_persist();		
+				let newName = event.target.value !== undefined && event.target.value.length > 0 ? event.target.value : '';
+				if(window.JOURNAL.notes[tokenIds]){
+					window.JOURNAL.notes[tokenIds].title = newName;
+					window.JOURNAL.persist();
 				}
+				window.TOKEN_OBJECTS[tokenIds].options.name = newName;
+				window.TOKEN_OBJECTS[tokenIds].place_sync_persist();		
 			});
 			let nameWrapper = $(`
 				<div class="token-image-modal-url-label-wrapper">
