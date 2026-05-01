@@ -2146,27 +2146,32 @@ class Token {
 				color: (window.TOKEN_SETTINGS?.light2?.color) ? window.TOKEN_SETTINGS.light2.color : 'rgba(142, 142, 142, 1)'
 			}
 		}
-		if(this.options.vision?.feet == undefined){
-			//TO DO VISION UPDATE: get each vision type seperately from darkvision
-			if(this.isPlayer()){
-				
-				let pcData = find_pc_by_player_id(this.options.id, false);
-				let darkvision = 0;
-				if(pcData && pcData.senses.length > 0) {
-						for(let i=0; i < pcData.senses.length; i++){
-							const ftPosition = pcData.senses[i].distance.indexOf('ft.');
-							const range = parseInt(pcData.senses[i].distance.slice(0, ftPosition));
-							if(range > darkvision)
-								darkvision = range;
-						}
-				}
-				this.options.vision = {
-					feet: darkvision.toString(),
-					color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
-				}
+
+
+		let vision = {
+			darkvision: 0,
+			devilsight: 0,
+			truesight: 0
+		}
+
+		if(this.isPlayer()){		
+			let pcData = find_pc_by_player_id(this.options.id, false);
+			if(pcData && pcData.senses.length > 0) {
+					const pcSenses = {
+						darkvision: "darkvision",
+						tremorsense: "darkvision",
+						blindsight: "truesight",
+						truesight: "truesight"
+					}
+					for(let i=0; i < pcData.senses.length; i++){
+						const name = pcData.senses[i].name?.toLowerCase();
+						const ftPosition = pcData.senses[i].distance.indexOf('ft.');
+						const range = parseInt(pcData.senses[i].distance.slice(0, ftPosition));
+						if(range > vision[pcSenses[name]])
+							vision[pcSenses[name]] = range;
+					}
 			}
 			else if(this.isMonster()){
-				let darkvision = 0;
 				if(window.monsterListItems){
 					let monsterSidebarListItem = this.options.monster == "open5e" ? window.open5eListItems.filter((d) => this.options.itemId == d.id)[0] : window.monsterListItems.filter((d) => this.options.monster == d.id)[0] ;	
 					if(!monsterSidebarListItem){
@@ -2177,46 +2182,33 @@ class Token {
 							}
 						}
 					}
-						
+					
 					if(monsterSidebarListItem){
-						if(monsterSidebarListItem.monsterData.senses.length > 0){
-							for(let i=0; i < monsterSidebarListItem.monsterData.senses.length; i++){
-								const ftPosition = monsterSidebarListItem.monsterData.senses[i].notes.indexOf('ft.')
-								const range = parseInt(monsterSidebarListItem.monsterData.senses[i].notes.slice(0, ftPosition));
-								if(range > darkvision)
-									darkvision = range;
-							}
-						}
+						vision = get_monster_senses(monsterSidebarListItem.monsterData.senses)
 					}
 				} 
+			}
+
+			if(this.options.vision?.feet == undefined){
 				this.options.vision = {
-					feet: darkvision.toString(),
+					feet: vision.darkvision.toString(),
 					color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
 				}
 			}
-			else{
-				this.options.vision = {
-					feet: 60,
-					color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
+			if(this.options.truesight?.feet == undefined){
+				this.options.truesight = {
+					feet: vision.truesight.toString(),
+					color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
 				}
-			
+			}
+			if(this.options.devilsight?.feet == undefined){
+				this.options.devilsight = {
+					feet: vision.devilsight.toString(),
+					color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
+				}
 			}
 		}
 
-		if(this.options.devilsight?.feet == undefined){
-		//TO DO VISION UPDATE: get each vision type seperately from darkvision above, update color with TOKEN_SETTINGS
-			this.options.devilsight = {
-				feet: 0,
-				color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
-			}
-		}
-		if(this.options.truesight?.feet == undefined){
-			//TO DO VISION UPDATE: get each vision type seperately from darkvision above, update color with TOKEN_SETTINGS
-			this.options.truesight = {
-				feet: 0,
-				color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
-			}
-		}
 	}
 	place(animationDuration) {
 		try{

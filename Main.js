@@ -2461,23 +2461,32 @@ function init_ui() {
 			}
 		}
 	}
-
+	function set_paste_location(event){
+		window.cursor_x = event.pageX;
+		window.cursor_y = event.pageY;
+	}
+	function enable_paste_mouse_move(){
+		document.addEventListener('mousemove', set_paste_location, { passive: true });
+	}
+	function disable_paste_mouse_move(){
+		document.removeEventListener('mousemove', set_paste_location);
+	}
 	// Helper function to disable window mouse handlers, required when we
 	// do token dragging operations with measure paths
 	window.disable_window_mouse_handlers = function () {
-
 		$(window.document).off("mousemove.mouseHandler", mousemove);
 		$(window.document).off("mousedown.mouseHandler", mousedown);
 		$(window.document).off("mouseup.mouseHandler", mouseup);
+		disable_paste_mouse_move();
 	}
 
 	// Helper function to enable mouse handlers, required when we
 	// do token dragging operations with measure paths
 	window.enable_window_mouse_handlers = function () {
-
 		$(window.document).on("mousemove.mouseHandler", mousemove);
 		$(window.document).on("mousedown.mouseHandler", mousedown);
 		$(window.document).on("mouseup.mouseHandler", mouseup);
+		enable_paste_mouse_move();
 	}
 
 	window.enable_window_mouse_handlers();

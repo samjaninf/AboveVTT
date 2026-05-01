@@ -1352,18 +1352,26 @@ async function create_and_place_token(listItem, hidden = undefined, specificImag
                     }
                     break;
             }
-            if(listItem.monsterData.senses.length > 0 && foundOptions.vision == undefined){
-                //TO DO VISION UPDATE: Get other monster vision types
-                let darkvision = 0;
-                for(let i=0; i < listItem.monsterData.senses.length; i++){
-                    const ftPosition = listItem.monsterData.senses[i].notes.indexOf('ft.')
-                    const range = parseInt(listItem.monsterData.senses[i].notes.slice(0, ftPosition));
-                    if(range > darkvision)
-                        darkvision = range;
+            if(listItem.monsterData.senses.length > 0){
+               
+                const vision = get_monster_senses(listItem.monsterData.senses);
+                if(foundOptions.vision == undefined){
+                    options.vision = {
+                        feet: vision.darkvision.toString(),
+                        color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
+                    }
                 }
-                options.vision = {
-                    feet: darkvision.toString(),
-                    color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
+                if(foundOptions.truesight == undefined){
+                    options.truesight = {
+                        feet: vision.truesight.toString(),
+                        color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
+                    }
+                }
+                if(foundOptions.devilsight == undefined){
+                    options.devilsight = {
+                        feet: vision.devilsight.toString(),
+                        color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
+                    }
                 }
             }
             break;
@@ -3063,46 +3071,67 @@ function display_aoe_token_configuration_modal(listItem, placedToken = undefined
             color: window.TOKEN_SETTINGS?.truesight?.color ? window.TOKEN_SETTINGS?.truesight?.color : 'rgba(142, 142, 142, 1)'
         }
     }
+    let vision = {
+        darkvision: 0,
+        devilsight: 0,
+        truesight: 0
+    }
+    if(listItem.isTypePC()){
+        let pcData = find_pc_by_player_id(listItem.id);
+        let vision = {
+            darkvision: 0,
+            devilsight: 0,
+            truesight: 0
+        }
+        if(pcData.senses.length > 0)
+        {
+            const pcSenses = {
+                darkvision: "darkvision",
+                tremorsense: "darkvision",
+                blindsight: "truesight",
+                truesight: "truesight"
+            }
+            for(let i=0; i < pcData.senses.length; i++){
+                const name = pcData.senses[i].name?.toLowerCase();
+                const ftPosition = pcData.senses[i].distance.indexOf('ft.');
+                const range = parseInt(pcData.senses[i].distance.slice(0, ftPosition));
+                if(range > vision[pcSenses[name]])
+                    vision[pcSenses[name]] = range;
+            }
+        }
+        customization.tokenOptions.vision = {
+            feet: vision.darkvision.toString(),
+            color: window.TOKEN_SETTINGS?.vision?.color ? window.TOKEN_SETTINGS?.vision?.color : 'rgba(142, 142, 142, 1)'
+        }
+        customization.tokenOptions.truesight = {
+            feet: vision.truesight.toString(),
+            color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
+        }
+        customization.tokenOptions.devilsight = {
+            feet: vision.devilsight.toString(),
+            color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
+        }
+    }
+    else if(listItem.isTypeMonster() || listItem.isTypeOpen5eMonster()){
+        vision = get_monster_senses(listItem.monsterData.senses);
+    }
     if(customization.tokenOptions.vision?.feet == undefined){
-        if(listItem.isTypePC()){
-            let pcData = find_pc_by_player_id(listItem.id);
-            let darkvision = 0;
-            if(pcData.senses.length > 0)
-            {
-                for(let i=0; i < pcData.senses.length; i++){
-                    const ftPosition = pcData.senses[i].distance.indexOf('ft.');
-                    const range = parseInt(pcData.senses[i].distance.slice(0, ftPosition));
-                    if(range > darkvision)
-                        darkvision = range;
-                }
-            }
-            customization.tokenOptions.vision = {
-                feet: darkvision.toString(),
-                color: window.TOKEN_SETTINGS?.vision?.color ? window.TOKEN_SETTINGS?.vision?.color : 'rgba(142, 142, 142, 1)'
-            }
+        customization.tokenOptions.vision = {
+            feet: vision.darkvision.toString(),
+            color: window.TOKEN_SETTINGS?.vision?.color ? window.TOKEN_SETTINGS?.vision?.color : 'rgba(142, 142, 142, 1)'
         }
-        else if(listItem.isTypeMonster() || listItem.isTypeOpen5eMonster()){
-            let darkvision = 0;
-            if(listItem.monsterData.senses.length > 0)
-            {
-                for(let i=0; i < listItem.monsterData.senses.length; i++){
-                    const ftPosition = listItem.monsterData.senses[i].notes.indexOf('ft.')
-                    const range = parseInt(listItem.monsterData.senses[i].notes.slice(0, ftPosition));
-                    if(range > darkvision)
-                        darkvision = range;
-                }
-            }
+    }
+    if(customization.tokenOptions.truesight?.feet == undefined){
+        customization.tokenOptions.truesight = {
+            feet: vision.truesight.toString(),
+            color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
+        }
+    }
+    if(customization.tokenOptions.devilsight?.feet == undefined){
 
-            customization.tokenOptions.vision = {
-                feet: darkvision.toString(),
-                color: window.TOKEN_SETTINGS?.vision?.color ? window.TOKEN_SETTINGS?.vision?.color : 'rgba(142, 142, 142, 1)'
-            }
-        }
-        else{
-            customization.tokenOptions.vision = {
-                feet: '60',
-                color: window.TOKEN_SETTINGS?.vision?.color ? window.TOKEN_SETTINGS?.vision?.color : 'rgba(142, 142, 142, 1)'
-            }
+        customization.tokenOptions.devilsight = {
+            feet: vision.devilsight.toString(),
+            color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
         }
     }
     if(customization.tokenOptions.light1?.feet == undefined){
@@ -4497,8 +4526,12 @@ function create_token_copy_inside(listItem, open5e = false){
         options.sizeId = listItem.monsterData.sizeId;
         // TODO: handle custom sizes
     }
-    //TO DO VISION UPDATE: other senses for vision
-    let darkvision = 0;
+    
+    let vision = {
+        darkvision: 0,
+        devilsight: 0,
+        truesight: 0
+    }
     if(window.monsterListItems){
         let monsterSidebarListItem = open5e ? window.open5eListItems.filter((d) => listItem.id == d.id)[0] : window.monsterListItems.filter((d) => listItem.id == d.id)[0]; 
         if(!monsterSidebarListItem){
@@ -4512,18 +4545,44 @@ function create_token_copy_inside(listItem, open5e = false){
            
         if(monsterSidebarListItem){
             if(monsterSidebarListItem.monsterData.senses.length > 0){
+       
+                const monsterSenseIds = {
+                    1 : 'truesight', //blind sightw
+                    2 : 'darkvision',
+                    4 : 'truesight'
+                }	
                 for(let i=0; i < monsterSidebarListItem.monsterData.senses.length; i++){
+                    const senseKey = i+1;
+            
                     const ftPosition = monsterSidebarListItem.monsterData.senses[i].notes.indexOf('ft.')
+                    
                     const range = parseInt(monsterSidebarListItem.monsterData.senses[i].notes.slice(0, ftPosition));
-                    if(range > darkvision)
-                        darkvision = range;
+                    if(monsterSenseIds[senseKey] == undefined && range>darkvision){
+                        vision.darkvision = range;
+                    } else{
+                        if(monsterSenseIds[senseKey] == 'darkvision'){
+                            const isDevilsight = monsterSidebarListItem.monsterData.senses[i].notes.includes(/magical darkness|devilsight|devil sight|devil's sight/gi);
+                            vision.devilsight = range;
+                            continue;
+                        }
+                        vision[monsterSenseIds[senseKey]] = range;
+                    }
+                        
                 }
             }
         }
     } 
     options.vision = {
-        feet: darkvision.toString(),
+        feet: vision.darkvision.toString(),
         color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
+    }
+    options.truesight = {
+        feet: vision.truesight.toString(),
+        color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
+    }
+    options.devilsight = {
+        feet: vision.devilsight.toString(),
+        color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
     }
     
     options.monster = 'customStat'

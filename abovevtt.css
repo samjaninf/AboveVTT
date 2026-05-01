@@ -2768,13 +2768,15 @@ body>[class*='styles_mobileNav']>button{
 }*/
 
 /* .ct-sidebar__pane-content, */
+body .sidebar__pane-content{
+    max-width: 600px !important;
+    width: var(--sidebar-width, 340px) !important;
+}
 body:not(.encounter-builder-page) .sidebar__pane-content {
     position: absolute;
     right: 0;
     top: 28px;
     height: calc(100vh - 30px) !important;
-    width: var(--sidebar-width, 340px) !important;
-    max-width: 600px !important;
 }
 body .gamelogcontainer .sidebar__pane-content {
     top: 0px !important;
