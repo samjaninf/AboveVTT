@@ -2271,7 +2271,7 @@ class JournalManager{
 				'padding-right': '10px'
 			});
 			result.each((i, block) =>
-				block.append(createSendPlayerButton(block, "login")));
+				$(block).append(createSendPlayerButton(block, "login")));
 		}
 	}
 				   

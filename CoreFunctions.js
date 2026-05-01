@@ -2860,7 +2860,7 @@ function dialogMenuOption(rootId, container, opt) {
 }
 function createDialogMenu(rootId, options) {
   const dialog = $(`<dialog id="${rootId}" class="js-popup">
-  <form method="dialog"><div class="js-popup-options"/></form></dialog>`);
+  <form method="dialog"><div class="js-popup-options prevent-sidebar-modal-close"/></form></dialog>`);
   const contain = dialog.find('.js-popup-options')[0]
   options.map((opt) => dialogMenuOption(rootId, contain, opt));
   return dialog[0]; //note: return native element, NOT jquery

@@ -5263,6 +5263,10 @@ td button.block-send-to-game-log {
 td button.block-send-to-game-log span{
     font-size:18px !important;
 }
+/*size of send-to button when in table*/
+td > button.block-send-to-game-log > span {
+    font-size:12px !important;
+}
 
 h3#error-message{
     max-height:100px;
