@@ -1107,7 +1107,7 @@ function b64DecodeUnicode(str) {
 
 
 
-function download(data, filename, type) {
+function download(data, filename, type, appendTo = document.body) {
     let file = new Blob([data], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
@@ -1116,10 +1116,11 @@ function download(data, filename, type) {
                 url = URL.createObjectURL(file);
         a.href = url;
         a.download = filename;
-        document.body.appendChild(a);
+		a.id = 'downloadAvttExportLink'
+        $(appendTo).append(a);
         a.click();
         setTimeout(function() {
-            document.body.removeChild(a);
+            $('#downloadAvttExportLink').remove();
             window.URL.revokeObjectURL(url);
         }, 0);
     }
@@ -2076,7 +2077,7 @@ function export_audio_csv() {
 
 
 
-function export_file(filePrefix="", saveDateStamp=false) {
+function export_file(downloadAppendTo) {
 	build_import_loading_indicator('Preparing Export File');
 	const DataFile = {
 		version: 2,
@@ -2088,7 +2089,7 @@ function export_file(filePrefix="", saveDateStamp=false) {
 	};
 	const currentdate = new Date(); 
 	const datetime = `${currentdate.getFullYear()}-${(currentdate.getMonth()+1)}-${currentdate.getDate()}`
-	const filename = `${filePrefix}${window.CAMPAIGN_INFO.name}-${datetime}.abovevtt`;
+	const filename = `${window.CAMPAIGN_INFO.name}-${datetime}.abovevtt`;
 	const storageKey = `AVTT-exportStamp-${window.CAMPAIGN_INFO.id}`;
 	let firstError = false;
 	return AboveApi.exportScenes()
@@ -2100,7 +2101,7 @@ function export_file(filePrefix="", saveDateStamp=false) {
 			DataFile.soundpads = window.SOUNDPADS;
 			DataFile.mixerstate = window.MIXER.state();
 			DataFile.tracklibrary = Array.from(window.TRACK_LIBRARY.map().entries());
-			download(b64EncodeUnicode(JSON.stringify(DataFile,null,"\t")),filename,"text/plain");
+			download(b64EncodeUnicode(JSON.stringify(DataFile,null,"\t")),filename,"text/plain", downloadAppendTo);
 			localStorage.setItem(storageKey, Date.now().toString())
 			return true;
 		})
@@ -2115,7 +2116,7 @@ function export_file(filePrefix="", saveDateStamp=false) {
 				DataFile.soundpads = window.SOUNDPADS;
 				DataFile.mixerstate = window.MIXER.state();
 				DataFile.tracklibrary = Array.from(window.TRACK_LIBRARY.map().entries());
-				download(b64EncodeUnicode(JSON.stringify(DataFile,null,"\t")),filename,"text/plain");
+				download(b64EncodeUnicode(JSON.stringify(DataFile,null,"\t")),filename,"text/plain", downloadAppendTo);
 				$(".import-loading-indicator").remove();
 				localStorage.setItem(storageKey, Date.now().toString());	
 				return true;				
