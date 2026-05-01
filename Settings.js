@@ -681,7 +681,8 @@ function avtt_settings() {
 		],
 		defaultValue: 340,
 		class: 'ui',
-		global: 1
+		global: 1,
+		hiddenSetting: true
 	})
 	
 	settings.push(
@@ -1196,7 +1197,7 @@ function init_settings() {
 	`);
 	for(let i = 0; i < experimental_features.length; i++) {	
 		let setting = experimental_features[i];
-		if (setting.dmOnly === true && !window.DM) {
+		if ((setting.dmOnly === true && !window.DM) || setting.hiddenSetting === true) {
 			continue;
 		}
 		let currentValue = get_avtt_setting_value(setting.name);
