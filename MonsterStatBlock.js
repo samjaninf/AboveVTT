@@ -1780,7 +1780,7 @@ function get_monster_senses(senses, vision = {darkvision: 0, devilsight: 0, true
           vision.darkvision = range;
         } else{
           if(monsterSenseIds[senseKey] == 'darkvision'){
-            const isDevilsight = senses[i].notes.match(/magical darkness|devil'?\s?s?sight/gi);
+            const isDevilsight = senses[i].notes.match(/magical darkness|devil'?s?\s?sight/gi);
             if(isDevilsight){
               vision.devilsight = range;
               continue;

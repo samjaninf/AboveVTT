@@ -4561,7 +4561,7 @@ function create_token_copy_inside(listItem, open5e = false){
                         vision.darkvision = range;
                     } else{
                         if(monsterSenseIds[senseKey] == 'darkvision'){
-                            const isDevilsight = monsterSidebarListItem.monsterData.senses[i].notes.includes(/magical darkness|devilsight|devil sight|devil's sight/gi);
+                            const isDevilsight = monsterSidebarListItem.monsterData.senses[i].notes.includes(/magical darkness|devil'?s?\s?sight/gi);
                             vision.devilsight = range;
                             continue;
                         }
