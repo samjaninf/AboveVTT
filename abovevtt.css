@@ -2096,6 +2096,12 @@ padding-bottom: 5px;
         0px 0px 5px #000;
     pointer-events:none;
 }
+.door-button[data-name][data-always-show-name='true']:hover:after,
+.door-button[data-name][data-always-show-name='true']:after{
+    --door-font-size-zoom: calc(var(--font-size-zoom) / var(--scene-scale));
+    transform: none;
+    bottom: calc(-0.8 * var(--door-font-size-zoom));
+}
 .labelToken.notVisible.hasTooltip:after,
 .labelToken.notVisible.hasTooltip:hover:after{
     visibility: hidden;
