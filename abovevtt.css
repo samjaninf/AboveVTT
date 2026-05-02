@@ -1994,12 +1994,12 @@ div#scene_properties form > div{
     transform: translate(-50%);
     pointer-events: none;
 }
-.door-button[data-name]::after{
-    --door-font-size-zoom: calc(var(--font-size-zoom) / var(--scene-scale));
-    font-size: var(--door-font-size-zoom);
-    bottom: calc(-1 * (var(--door-font-size-zoom) + var(--door-font-size-zoom) / 1.5));
-}
 
+.door-button[data-name]::after{
+    bottom: -100%;
+    transform: translate(-50%);
+    font-size: 0.85em;
+}
 
 .definitelyNotAToken.ui-draggable-disabled>.token-image{
     cursor: default !important;
@@ -2098,9 +2098,7 @@ padding-bottom: 5px;
 }
 .door-button[data-name][data-always-show-name='true']:hover:after,
 .door-button[data-name][data-always-show-name='true']:after{
-    --door-font-size-zoom: calc(var(--font-size-zoom) / var(--scene-scale));
     transform: none;
-    bottom: calc(-0.8 * var(--door-font-size-zoom));
 }
 .labelToken.notVisible.hasTooltip:after,
 .labelToken.notVisible.hasTooltip:hover:after{
