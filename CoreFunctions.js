@@ -2920,23 +2920,26 @@ function addDialogCloser(element) {
   doc._hasDialogCloser = true;
 }
 
-function sendClonedElement(element, whisper, popInstead) {
+function sendPopElement(element, whisper) {
+  const what = element.find(".magnify, .monster-image, video");
+  const src = what?.attr("src");
+  const video = what.prop('nodeName') === 'VIDEO';  
+  if(src) {
+    const msg = { src, timed: 10000, from: window.PLAYER_ID, type: video ? "iframe" : "image" };
+    if(whisper) msg.whisper = whisper;
+    window.MB.sendMessage('custom/myVTT/Popup',  msg);
+  } else {
+    console.error("Could not find image to pop", src);
+  }
+}
+function sendClonedElement(element, whisper) {
   const targetBlock = $(element).clone();
   targetBlock.find('button.block-send-to-game-log').remove();
-  targetBlock.find('img').removeAttr('width height style').toggleClass('magnify', true);
-  if(popInstead) {
-      //todo: deal with video
-      const imgSrc = targetBlock.find(".magnify, .monster-image")?.attr("src")
-    if(imgSrc) {
-      const msg = { src: imgSrc, timed: 10000, from:window.PLAYER_ID };
-      if(whisper) msg.whisper = whisper;
-      window.MB.sendMessage('custom/myVTT/Popup',  msg);
-    } else {
-      console.error("Could not find image to pop", imgSrc);
-    }
-  } else {
-    send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, whisper);
-  }
+  targetBlock.find('img, video').removeAttr('width height style').toggleClass('magnify', true);
+  const video = targetBlock.find('video');
+  //why?
+  if(video) video.attr("href", video.attr('src'));
+  send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, whisper);
 }
 
 function createSendPlayerMenu(menuId, target) {
@@ -2946,8 +2949,8 @@ function createSendPlayerMenu(menuId, target) {
     const options = $(e.target).closest(".js-popup-options")?.[0];
     const selected = $(options).find('.js-popup--is-active').map((i, el) => el.getAttribute('data-id')).get().filter((a)=> !a.startsWith('_'));
     const theTriggeringButton = $(`#${$(dialog).attr("data-whichbutton")}`);
-    //todo: if selected is everyone then use undefined here:    
-    sendClonedElement(theTriggeringButton.parent(), selected, verb === 'pop');
+    //todo: if selected is everyone then use undefined here:
+    ((verb === 'pop') ? sendPopElement : sendClonedElement)(theTriggeringButton.parent(), selected);
     $(e.target).removeClass('js-popup--is-active');
   };
   const toggle_everyone = (e, skipCount) => {
