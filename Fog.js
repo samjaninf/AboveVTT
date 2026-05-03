@@ -8069,27 +8069,30 @@ function redraw_light(darknessMoved = false, limitActiveRays = 0) {
 				
 
 
-				if (window.lightAuraClipPolygon[auraId].darkvision > 0) {
-					clip_circle_with_polygon(lightInLosContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].darkvision, window.lightAuraClipPolygon[auraId].vision.color, window.lightPolygon);
-				}
+				
 
 				$(`.aura-element-container-clip[id='${auraId}'] [id*='vision_']`).toggleClass('notVisible', false);
 			
 				drawPolygon(offscreenContext, window.lightPolygon, 'rgba(255, 255, 255, 1)', true, 2, undefined, undefined, undefined, true, true); //draw to offscreen canvas so we don't have to render every draw and use this for a mask	
 				drawPolygon(moveOffscreenCanvasMaskContext, window.movePolygon, 'rgba(255, 255, 255, 1)', true, 0, undefined, undefined, undefined, true, true); //draw to offscreen canvas so we don't have to render every draw and use this for a mask
-				if (window.noDarknessPolygon?.length>1 && (window.DM !== true || window.SelectedTokenVision === true)) {	
-					devilsightCanvasContext.globalCompositeOperation = "lighten";				
-					if (window.lightAuraClipPolygon[auraId].devilsight > 0) {
-						clip_circle_with_polygon(devilsightCanvasContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].devilsight, '#fff', window.noDarknessPolygon)
-						clip_circle_with_polygon(lightInLosContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].devilsight, window.lightAuraClipPolygon[auraId].devilsight.color, window.noDarknessPolygon);
-						clip_circle_with_polygon(offscreenContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].devilsight, '#fff', window.noDarknessPolygon);
+				if(window.lightAuraClipPolygon[auraId] != undefined){
+					if (window.lightAuraClipPolygon[auraId].darkvision > 0) {
+						clip_circle_with_polygon(lightInLosContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].darkvision, window.lightAuraClipPolygon[auraId].vision.color, window.lightPolygon);
 					}
-					if (window.lightAuraClipPolygon[auraId].truesight > 0) {
-						truesightCanvasContext.globalCompositeOperation = "lighten";
-						clip_circle_with_polygon(devilsightCanvasContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, '#fff', window.noDarknessPolygon)
-						clip_circle_with_polygon(truesightCanvasContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, '#fff', window.noDarknessPolygon)
-						clip_circle_with_polygon(lightInLosContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, window.lightAuraClipPolygon[auraId].truesight.color, window.noDarknessPolygon);
-						clip_circle_with_polygon(offscreenContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, '#fff', window.noDarknessPolygon);
+					if (window.noDarknessPolygon?.length>1 && (window.DM !== true || window.SelectedTokenVision === true)) {	
+						devilsightCanvasContext.globalCompositeOperation = "lighten";				
+						if (window.lightAuraClipPolygon[auraId].devilsight > 0) {
+							clip_circle_with_polygon(devilsightCanvasContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].devilsight, '#fff', window.noDarknessPolygon)
+							clip_circle_with_polygon(lightInLosContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].devilsight, window.lightAuraClipPolygon[auraId].devilsight.color, window.noDarknessPolygon);
+							clip_circle_with_polygon(offscreenContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].devilsight, '#fff', window.noDarknessPolygon);
+						}	
+						if (window.lightAuraClipPolygon[auraId].truesight > 0) {
+							truesightCanvasContext.globalCompositeOperation = "lighten";
+							clip_circle_with_polygon(devilsightCanvasContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, '#fff', window.noDarknessPolygon)
+							clip_circle_with_polygon(truesightCanvasContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, '#fff', window.noDarknessPolygon)
+							clip_circle_with_polygon(lightInLosContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, window.lightAuraClipPolygon[auraId].truesight.color, window.noDarknessPolygon);
+							clip_circle_with_polygon(offscreenContext, window.lightAuraClipPolygon[auraId].middle.x, window.lightAuraClipPolygon[auraId].middle.y, window.lightAuraClipPolygon[auraId].truesight, '#fff', window.noDarknessPolygon);
+						}
 					}
 				}
 			}
