@@ -979,7 +979,7 @@ body:has(#hide_rightpanel[data-visible="0"]) #avtt-sidebar-resize-handle {
   transform: scale(var(--scene-scale));
   display: block;
   pointer-events: none;
-  z-index: 1000000;
+  z-index: 20;
 }
 #dragbox .drag-box-b {
   stroke: black;
