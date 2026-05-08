@@ -1333,7 +1333,9 @@ class Token {
 					window.TOKEN_OBJECTS[tokenID].update_and_sync()
 				}
 			});
-			hp_input.on('click', function(e) {
+			hp_input.on('mouseup', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
 				$(e.target).select();
 			});
 			maxhp_input.change(function(e) {
@@ -1347,7 +1349,9 @@ class Token {
 					window.TOKEN_OBJECTS[tokenID].update_and_sync()
 				}
 			});
-			maxhp_input.on('click', function(e) {
+			maxhp_input.on('mouseup', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
 				$(e.target).select();
 			});
 		}
