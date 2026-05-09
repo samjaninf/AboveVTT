@@ -970,7 +970,8 @@ body:has(#hide_rightpanel[data-visible="0"]) #avtt-sidebar-resize-handle {
     filter: drop-shadow(0px 0px 2px #000) blur(1px); /*fill in fog gaps on player view*/
     opacity: 1;
 }
-#dragbox {
+#dragbox,
+#rotDragbox {
   position: absolute;
   overflow: visible;
   top: 0;
@@ -980,6 +981,9 @@ body:has(#hide_rightpanel[data-visible="0"]) #avtt-sidebar-resize-handle {
   display: block;
   pointer-events: none;
   z-index: 20;
+}
+#rotDragbox{
+    z-index: 45;
 }
 #dragbox .drag-box-b {
   stroke: black;
@@ -1005,16 +1009,16 @@ body:has(#hide_rightpanel[data-visible="0"]) #avtt-sidebar-resize-handle {
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
-#dragbox .grabber {
+#rotDragbox .grabber {
   cursor: alias;
   pointer-events: auto;
 }
 
 /*adjust grabber scale 1.2 here:*/
-#dragbox .grabber-icon-r {
+#rotDragbox .grabber-icon-r {
   transform: scale(calc(1.2 / var(--scene-scale) / var(--window-zoom))) translate(0px, -25px);
 }
-#dragbox .grabber-icon-c {
+#rotDragbox .grabber-icon-c {
   transform: translate(0px, -10px) scale(calc(1.2 / var(--scene-scale)  / var(--window-zoom))) translate(-12.5px, -25px);
 }
 

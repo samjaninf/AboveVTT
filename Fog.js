@@ -1438,7 +1438,7 @@ function reset_canvas(apply_zoom=true) {
 	$("#scene_map_container").css({"width": sceneMapWidth, "height": sceneMapHeight});
 	// grid overlay css tiling needs a container to fill that matches map
 	$("#grid_svg_overlay_container").css({"width": sceneMapWidth, "height": sceneMapHeight});
-	$("#dragbox").css({"width": sceneMapWidth, "height": sceneMapHeight});	
+	$("#dragbox, #rotDragbox").css({"width": sceneMapWidth, "height": sceneMapHeight});	
 	ctxScale('peer_overlay', sceneMapWidth, sceneMapHeight);
 	ctxScale('temp_overlay', sceneMapWidth, sceneMapHeight);
 	ctxScale('draw_overlay_under_fog_darkness', sceneMapWidth, sceneMapHeight, true);
