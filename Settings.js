@@ -1161,7 +1161,7 @@ function init_settings() {
 					<input accept='.abovevtt' id='input_file' type='file' multiple style='display: none' />
 				</div>
 				<div id='export_current_scene_container'>
-					<button id='export_current_scene' onclick='export_current_scene();' class="sidebar-panel-footer-button sidebar-hover-text" data-hover="Download a file containing the current scene data including token notes">EXPORT CURRENT SCENE ONLY</button>
+					<button id='export_current_scene' onclick='export_current_scene();' class="sidebar-panel-footer-button sidebar-hover-text" data-hover="Download a file containing the current scene data including token notes">EXPORT CURRENT SCENE</button>
 				</div>
 				<div id='recover_scenes_container'>
 		<button id='recover_scenes' onclick='recover_scenes();' class="sidebar-panel-footer-button sidebar-hover-text" data-hover="Attempt Scene recovery from older campaign invite link"> Recover Scenes</button>
