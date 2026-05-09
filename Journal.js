@@ -3083,6 +3083,40 @@ class JournalManager{
 		}
 
     }
+	getCustomCR(statBlock){
+		if(statBlock == undefined) return 0;
+       
+		statBlock.find('style').remove();
+		statBlock=statBlock[0].innerHTML;
+		let crText = $(statBlock).find('.custom-challenge-rating.custom-stat').text();
+		if(crText == '' || crText == undefined){
+			let searchText = statBlock.replaceAll('mon-stat-block-2024', '').replaceAll(/\&nbsp\;/g,' ')
+
+			let statBlockCR = searchText.matchAll(/[\s>]CR[\s]+([0-9]+(\/[0-9])?)/gi).next()
+			if(statBlockCR.value != undefined){
+			if(statBlockCR.value[1] != undefined)
+				crText = statBlockCR.value[1];
+			} 
+			else{
+			statBlockCR = searchText.matchAll(/[\s>](CR[\W]|challenge)[\s\S]*?[\s>]([0-9]+(\/[0-9])?)/gi).next()
+
+				if(statBlockCR.value != undefined){
+					if(statBlockCR.value[2] != undefined)
+						crText = statBlockCR.value[2];
+				}  
+			}
+		}
+		if(crText == '' || crText == undefined) return 0;
+
+		try{
+			const cr = eval(crText);
+			return cr;
+		}catch(e){
+			console.warn(`Could not parse CR from custom stat block, defaulting to 0. CR text was ${crText}`);
+			return 0;
+		}
+	}
+
 	
 	note_visibility(id,visibility){
 		this.notes[id].player=visibility;
