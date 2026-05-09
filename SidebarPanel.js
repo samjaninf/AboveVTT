@@ -1892,7 +1892,7 @@ function build_sidebar_list_row(listItem) {
       if(window.JOURNAL.notes[listItem.id] !== undefined){
         const statBlock = $(`<div>${window.JOURNAL.notes[listItem.id].text}</div>`)
         const cr = window.JOURNAL.getCustomCR(statBlock);
-        subtitle.append(`<div class="subtitle-attibute"><span class="plain-text">CR</span>${cr}</div>`)
+        subtitle.append(`<div class="subtitle-attibute challenge-rating"><span class="plain-text">CR</span>${cr}</div>`)
       }
      
       // TODO: Style specifically for My Tokens
@@ -2016,9 +2016,9 @@ function build_sidebar_list_row(listItem) {
       if(window.JOURNAL.notes[listItem.id] !== undefined){
         const statBlock = $(`<div>${window.JOURNAL.notes[listItem.id].text}</div>`)
         const cr = window.JOURNAL.getCustomCR(statBlock);
-        subtitle.append(`<div class="subtitle-attibute"><span class="plain-text">CR</span>${cr}</div>`)
+        subtitle.append(`<div class="subtitle-attibute challenge-rating"><span class="plain-text">CR</span>${cr}</div>`)
       } else{
-        subtitle.append(`<div class="subtitle-attibute"><span class="plain-text">CR</span>${convert_challenge_rating_id(listItem.monsterData.challengeRatingId)}</div>`);   
+        subtitle.append(`<div class="subtitle-attibute challenge-rating"><span class="plain-text">CR</span>${convert_challenge_rating_id(listItem.monsterData.challengeRatingId)}</div>`);   
       }
       if (listItem.monsterData.isHomebrew === true) {
         subtitle.append(`<div class="subtitle-attibute"><span class="material-icons">alt_route</span>Homebrew</div>`);
@@ -2044,7 +2044,7 @@ function build_sidebar_list_row(listItem) {
       break;
     case ItemType.Open5e:
       row.attr("data-monster", listItem.monsterData.id);
-      subtitle.append(`<div class="subtitle-attibute"><span class="plain-text">CR</span>${convert_challenge_rating_id(listItem.monsterData.challengeRatingId)}</div>`);
+      subtitle.append(`<div class="subtitle-attibute challenge-rating"><span class="plain-text">CR</span>${convert_challenge_rating_id(listItem.monsterData.challengeRatingId)}</div>`);
       if (listItem.monsterData.isHomebrew === true) {
         subtitle.append(`<div class="subtitle-attibute"><span class="material-icons" style="width: 15px;font-family: 'Material Symbols Outlined'; font-size:15px;">book_2</span>${listItem.monsterData.document?.key}</div>`);
       } 

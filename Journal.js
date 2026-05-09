@@ -3117,7 +3117,7 @@ class JournalManager{
 		}
 	}
 
-	
+
 	note_visibility(id,visibility){
 		this.notes[id].player=visibility;
 
@@ -4711,6 +4711,15 @@ class JournalManager{
 				self.notes[note_id].plain = tinymce.activeEditor.getContent({ format: 'text' });
 				self.notes[note_id].statBlock = statBlock;
 				self.persist();
+				if(statBlock){
+					const row = $(`#tokens-panel .sidebar-list-item-row[data-id='${note_id}']`);
+					const subtitle = row.find('.sidebar-list-item-row-details-subtitle');
+					subtitle.find('.challenge-rating').remove();
+					const statBlock = $(`<div>${self.notes[note_id].text}</div>`)
+					const cr = window.JOURNAL.getCustomCR(statBlock);
+					subtitle.prepend(`<div class="subtitle-attibute challenge-rating"><span class="plain-text">CR</span>${cr}</div>`)
+				}
+			
 				const dmScreenPageOpen = $('#dmScreenCustomBlock');
 				if(dmScreenPageOpen.length > 0){
 					const openNoteId = dmScreenPageOpen.attr('data-note-id');
