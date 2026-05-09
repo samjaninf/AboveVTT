@@ -4545,43 +4545,20 @@ function create_token_copy_inside(listItem, open5e = false){
            
         if(monsterSidebarListItem){
             if(monsterSidebarListItem.monsterData.senses.length > 0){
-       
-                const monsterSenseIds = {
-                    1 : 'truesight', //blind sightw
-                    2 : 'darkvision',
-                    4 : 'truesight'
-                }	
-                for(let i=0; i < monsterSidebarListItem.monsterData.senses.length; i++){
-                    const senseKey = i+1;
-            
-                    const ftPosition = monsterSidebarListItem.monsterData.senses[i].notes.indexOf('ft.')
-                    
-                    const range = parseInt(monsterSidebarListItem.monsterData.senses[i].notes.slice(0, ftPosition));
-                    if(monsterSenseIds[senseKey] == undefined && range>darkvision){
-                        vision.darkvision = range;
-                    } else{
-                        if(monsterSenseIds[senseKey] == 'darkvision'){
-                            const isDevilsight = monsterSidebarListItem.monsterData.senses[i].notes.includes(/magical darkness|devil'?s?\s?sight/gi);
-                            vision.devilsight = range;
-                            continue;
-                        }
-                        vision[monsterSenseIds[senseKey]] = range;
-                    }
-                        
-                }
+                vision = get_monster_senses(monsterSidebarListItem.monsterData.senses, vision);
             }
         }
     } 
     options.vision = {
-        feet: vision.darkvision.toString(),
+        feet: foundOptions.vision?.feet == undefined ? vision.darkvision.toString() : foundOptions.vision.feet,
         color: (window.TOKEN_SETTINGS?.vision?.color) ? window.TOKEN_SETTINGS.vision.color : 'rgba(142, 142, 142, 1)'
     }
     options.truesight = {
-        feet: vision.truesight.toString(),
+        feet: foundOptions.truesight?.feet == undefined ? vision.truesight.toString() : foundOptions.truesight.feet,
         color: (window.TOKEN_SETTINGS?.truesight?.color) ? window.TOKEN_SETTINGS.truesight.color : 'rgba(142, 142, 142, 1)'
     }
     options.devilsight = {
-        feet: vision.devilsight.toString(),
+        feet: foundOptions.devilsight?.feet == undefined ? vision.devilsight.toString() : foundOptions.devilsight.feet,
         color: (window.TOKEN_SETTINGS?.devilsight?.color) ? window.TOKEN_SETTINGS.devilsight.color : 'rgba(142, 142, 142, 1)'
     }
     
