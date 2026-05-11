@@ -978,6 +978,34 @@ class MessageBroker {
 					}
 					create_combat_tracker_timer(duration, startTime)
 				}
+			} else if(msg.eventType == "custom/myVTT/cancelTimer"){
+				const {startTime} = msg.data;
+				if(window.chatTimers[startTime]){
+					clearInterval(window.chatTimers[startTime].interval);
+					delete window.chatTimers[startTime];
+					$(`.chatTimer[data-start="${startTime}"]`).remove();
+				}
+				return;
+			} else if(msg.eventType == "custom/myVTT/pauseTimer"){
+				const {startTime} = msg.data;
+				if(window.chatTimers[startTime]){
+					clearInterval(window.chatTimers[startTime].interval);
+				}
+				const pauseButton = $(`.chatTimer[data-start="${startTime}"] .timerPauseButton`);
+				pauseButton.text("play_arrow");
+				pauseButton.toggleClass("paused", true);
+				return;
+			} else if(msg.eventType == "custom/myVTT/restartTimer"){
+				const {startTime, newDuration} = msg.data;
+				const timerBox = $(`.chatTimer[data-start="${startTime}"]`);
+				const pauseButton = timerBox.find('.timerPauseButton');
+				pauseButton.text("pause");
+				pauseButton.toggleClass("paused", false);
+				if(window.chatTimers[startTime]){
+					clearInterval(window.chatTimers[startTime].interval);
+					window.chatTimers[startTime].interval = setTimerInterval(timerBox, startTime);
+				}
+				return;
 			} else if (msg.eventType == "custom/myVTT/open-url-embed"){
 				const url = msg.data;
 				display_url_embeded(url);
