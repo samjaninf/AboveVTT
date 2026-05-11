@@ -686,7 +686,7 @@ function deleteDB(){
     objectStoreRequest.onsuccess = function(event) {       
       $('#exploredCanvas').remove();
       redraw_light();
-      alert('This campaigns local explored vision data has been cleared.')
+      showTempMessage('This campaigns local explored vision data has been cleared.')
     };
   }
 }
@@ -707,7 +707,7 @@ function deleteExploredScene(sceneId){
       if(sceneId == window.CURRENT_SCENE_DATA.id){
         $('#exploredCanvas').remove();
         redraw_light();
-        alert('Scene Explore Trail Data Cleared')
+        showTempMessage('Scene Explore Trail Data Cleared')
       }        
     };
 }
@@ -1687,35 +1687,84 @@ function convertMmSsToMs(text) {
 function convertMsToMmSs(duration) {
   return  `${`${Math.floor(duration / 60000)}`.padStart(2, '0')}:${`${Math.floor((duration % 60000) / 1000)}`.padStart(2, '0')}`
 }
-function create_gamelog_timer(message, duration = 60000, startTime = Date.now()){
-  let timerId;
-  const startTimeString = convertMsToMmSs(duration);
-  const timerBox = $(`<div class='chatTimer' data-start='${startTime}'><span class='timerMessage'>${message}</span><span class='timerBar'>${startTimeString}</span></div>`);
-  const closeButton = $(`<span class='timerCloseButton'>&#10006;</span>`);
-  closeButton.on('click', function(){
-    clearInterval(timerId);
-    timerBox.remove();
-  });
-  timerBox.append(closeButton);
-  $(".glc-game-log > [class*='-GameLog']").before(timerBox);
-  timerId = setInterval(function(){
-    const elapsed = Date.now() - startTime;
-    const remaining = duration - elapsed;
-    if(remaining <= 0){
-      clearInterval(timerId);
+function setTimerInterval(timerBox, startTime){
+  const intervalTime = 1000;
+  return setInterval(function(){
+    window.chatTimers[startTime].remaining -= intervalTime;
+    if(window.chatTimers[startTime].remaining <= 0){
+      clearInterval(window.chatTimers[startTime].interval);
       setTimeout(function(){
         timerBox.remove();
       }, 5000)
       timerBox.find('.timerBar').css('color', 'red');
+      delete window.chatTimers[startTime];
     } else {
       const timerExists = $(`.chatTimer[data-start="${startTime}"]`).length > 0;
       if(!timerExists){
         $(".glc-game-log > [class*='-GameLog']").before(timerBox);
       }
-      const timeRemainingString = convertMsToMmSs(remaining);
+      const timeRemainingString = convertMsToMmSs(window.chatTimers[startTime].remaining);
       timerBox.find('.timerBar').text(timeRemainingString);
     }
-  }, 1000);
+  }, intervalTime);
+  
+}
+function create_gamelog_timer(message, duration = 60000, startTime = Date.now(), showCancelButton = window.DM) {
+    
+  if(window.chatTimers === undefined){
+    window.chatTimers = {};
+  }
+
+
+  
+  let timerId;
+  const startTimeString = convertMsToMmSs(duration);
+  const timerBox = $(`<div class='chatTimer' data-start='${startTime}'><span class='timerMessage'>${message}</span><span class='timerBar'>${startTimeString}</span></div>`);
+  const closeButton = $(`<span class='timerCloseButton'>&#10006;</span>`);
+  closeButton.on('click', function(){
+    clearInterval(window.chatTimers[startTime].interval);
+    timerBox.remove();
+  });
+  
+  if(showCancelButton){
+    const buttonContainer = $(`<span class='timerButtonContainer'></span>`);
+
+    const cancelButton = $(`<span class='timerCancelButton material-symbols-outlined'>stop</span>`);
+    cancelButton.on('click', function(){
+      clearInterval(window.chatTimers[startTime].interval);
+      delete window.chatTimers[startTime];
+      timerBox.remove();
+      window.MB.sendMessage("custom/myVTT/cancelTimer", {startTime});
+    });
+    buttonContainer.append(cancelButton);
+  
+
+    const pauseButton = $(`<span class='timerPauseButton material-symbols-outlined'>pause</span>`);
+    pauseButton.on('click', function(){
+      if(pauseButton.hasClass('paused')){
+        const newEndTime = Date.now() + window.chatTimers[startTime].remaining;
+        const newDuration = newEndTime - startTime;
+        window.chatTimers[startTime].interval = setTimerInterval(timerBox, startTime);
+        pauseButton.removeClass('paused');
+        pauseButton.text('pause');
+        window.MB.sendMessage("custom/myVTT/restartTimer", {startTime, newDuration});
+      }else{
+        clearInterval(window.chatTimers[startTime].interval);
+        window.MB.sendMessage("custom/myVTT/pauseTimer", {startTime});
+        pauseButton.addClass('paused');
+        pauseButton.text('play_arrow');
+      }
+
+    });
+    buttonContainer.append(pauseButton);
+    timerBox.append(buttonContainer);
+  }
+  timerBox.append(closeButton);
+  $(".glc-game-log > [class*='-GameLog']").before(timerBox);
+  window.chatTimers[startTime]= {
+    remaining: duration,
+    interval: setTimerInterval(timerBox, startTime)
+  }
 }
 /** The string "THE DM" has been used in a lot of places.
  * This prevents typos or case sensitivity in strings.
@@ -2184,7 +2233,7 @@ function set_campaign_secret(campaignSecret) {
 function projector_scroll_event(event){
       event.stopImmediatePropagation();
       if($('#projector_toggle.enabled > [class*="is-active"]').length>0){
-            let sidebarSize = ($('#hide_rightpanel.point-right').length>0 ? 340 : 0);
+            let sidebarSize = ($('#hide_rightpanel.point-right').length>0 ? get_sidebar_width() : 0);
             let center = center_of_view(); 
 
 
@@ -2212,6 +2261,13 @@ function store_campaign_info() {
   const campaignSecret = window.CAMPAIGN_SECRET;
   if (typeof campaignId !== "string" || campaignId.length <= 0) return;
   if (typeof campaignSecret !== "string" || campaignSecret.length <= 0) return;
+  // save all previous compaign secrets for later restoration
+  const previous = read_campaign_info(campaignId);
+  if(previous) {
+    if(previous === campaignSecret) return; //short circuit - no need to write
+    const previousPrevious = localStorage.getItem(`AVTT-CampaignInfo-${campaignId}-previous`) || "";
+    localStorage.setItem(`AVTT-CampaignInfo-${campaignId}-previous`, previousPrevious ? `${previous},${previousPrevious}` : previous);
+  }
   localStorage.setItem(`AVTT-CampaignInfo-${campaignId}`, campaignSecret);
 }
 
@@ -2227,6 +2283,7 @@ function read_campaign_info(campaignId) {
 /** @param {string} campaignId the DDB id of the campaign */
 function remove_campaign_info(campaignId) {
   localStorage.removeItem(`AVTT-CampaignInfo-${campaignId}`);
+  //todo: remove -previous as well?
 }
 
 // Low res thumbnails have the form https://www.dndbeyond.com/avatars/thumbnails/17/212/60/60/636377840850178381.jpeg

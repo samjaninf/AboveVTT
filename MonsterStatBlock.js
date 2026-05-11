@@ -1749,6 +1749,39 @@ class MonsterStatBlock {
     }
 }
 
+function get_monster_senses(senses, vision = {darkvision: 0, devilsight: 0, truesight: 0}){
+    if(senses.length > 0){
+      const monsterSenseIds = {
+        1 : 'truesight', //blind sight
+        2 : 'darkvision',
+        4 : 'truesight'
+      }	
+      for(let i=0; i < senses.length; i++){
+        const senseKey = senses[i].senseId;
+    
+        const ftPosition = senses[i].notes.indexOf('ft.')
+        
+        const range = parseInt(senses[i].notes.slice(0, ftPosition));
+        if(monsterSenseIds[senseKey] == undefined && range>darkvision){
+          vision.darkvision = range;
+        } else{
+          if(monsterSenseIds[senseKey] == 'darkvision'){
+            const isDevilsight = senses[i].notes.match(/magical darkness|devil'?s?\s?sight/gi);
+            if(isDevilsight){
+              vision.devilsight = range;
+              continue;
+            }
+              
+          }
+          vision[monsterSenseIds[senseKey]] = range;
+        }
+          
+      }
+    }
+    return vision;
+  
+}
+
 const hidemeHack = "<span class='hideme'></span>";
 
 // not sure where to find these, but I've reversed engineered it by looking at this.data.damageAdjustments and window.ddbConfigJson.damageAdjustments
