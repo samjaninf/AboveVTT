@@ -10758,6 +10758,29 @@ button.journal-view-button.journal-button img {
         top: 5px;
         right: 5px;
     }
+    .timerCancelButton,
+    .timerPauseButton{
+        color: rgb(211 211 211);
+        text-shadow: 1px 1px 1px #000, 0px 0px 1px #000;
+        font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+        font-size: 25px;
+        text-overflow: clip;
+    }
+    .timerButtonContainer{
+        display: flex;
+        gap: 5px;
+    }
+    .timerCancelButton:hover,
+    .timerPauseButton:hover{
+        cursor: pointer;
+        color: #F00;
+    }
+    .timerPauseButton:hover{
+        color: #ff8f00;
+    }
+    .timerPauseButton.paused:hover{
+        color: #23cb23;
+    }
 }
 
 .custom-stat-block input.injected-input {

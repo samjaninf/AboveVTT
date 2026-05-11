@@ -1687,35 +1687,84 @@ function convertMmSsToMs(text) {
 function convertMsToMmSs(duration) {
   return  `${`${Math.floor(duration / 60000)}`.padStart(2, '0')}:${`${Math.floor((duration % 60000) / 1000)}`.padStart(2, '0')}`
 }
-function create_gamelog_timer(message, duration = 60000, startTime = Date.now()){
-  let timerId;
-  const startTimeString = convertMsToMmSs(duration);
-  const timerBox = $(`<div class='chatTimer' data-start='${startTime}'><span class='timerMessage'>${message}</span><span class='timerBar'>${startTimeString}</span></div>`);
-  const closeButton = $(`<span class='timerCloseButton'>&#10006;</span>`);
-  closeButton.on('click', function(){
-    clearInterval(timerId);
-    timerBox.remove();
-  });
-  timerBox.append(closeButton);
-  $(".glc-game-log > [class*='-GameLog']").before(timerBox);
-  timerId = setInterval(function(){
-    const elapsed = Date.now() - startTime;
-    const remaining = duration - elapsed;
-    if(remaining <= 0){
-      clearInterval(timerId);
+function setTimerInterval(timerBox, startTime){
+  const intervalTime = 1000;
+  return setInterval(function(){
+    window.chatTimers[startTime].remaining -= intervalTime;
+    if(window.chatTimers[startTime].remaining <= 0){
+      clearInterval(window.chatTimers[startTime].interval);
       setTimeout(function(){
         timerBox.remove();
       }, 5000)
       timerBox.find('.timerBar').css('color', 'red');
+      delete window.chatTimers[startTime];
     } else {
       const timerExists = $(`.chatTimer[data-start="${startTime}"]`).length > 0;
       if(!timerExists){
         $(".glc-game-log > [class*='-GameLog']").before(timerBox);
       }
-      const timeRemainingString = convertMsToMmSs(remaining);
+      const timeRemainingString = convertMsToMmSs(window.chatTimers[startTime].remaining);
       timerBox.find('.timerBar').text(timeRemainingString);
     }
-  }, 1000);
+  }, intervalTime);
+  
+}
+function create_gamelog_timer(message, duration = 60000, startTime = Date.now(), showCancelButton = window.DM) {
+    
+  if(window.chatTimers === undefined){
+    window.chatTimers = {};
+  }
+
+
+  
+  let timerId;
+  const startTimeString = convertMsToMmSs(duration);
+  const timerBox = $(`<div class='chatTimer' data-start='${startTime}'><span class='timerMessage'>${message}</span><span class='timerBar'>${startTimeString}</span></div>`);
+  const closeButton = $(`<span class='timerCloseButton'>&#10006;</span>`);
+  closeButton.on('click', function(){
+    clearInterval(window.chatTimers[startTime].interval);
+    timerBox.remove();
+  });
+  
+  if(showCancelButton){
+    const buttonContainer = $(`<span class='timerButtonContainer'></span>`);
+
+    const cancelButton = $(`<span class='timerCancelButton material-symbols-outlined'>stop</span>`);
+    cancelButton.on('click', function(){
+      clearInterval(window.chatTimers[startTime].interval);
+      delete window.chatTimers[startTime];
+      timerBox.remove();
+      window.MB.sendMessage("custom/myVTT/cancelTimer", {startTime});
+    });
+    buttonContainer.append(cancelButton);
+  
+
+    const pauseButton = $(`<span class='timerPauseButton material-symbols-outlined'>pause</span>`);
+    pauseButton.on('click', function(){
+      if(pauseButton.hasClass('paused')){
+        const newEndTime = Date.now() + window.chatTimers[startTime].remaining;
+        const newDuration = newEndTime - startTime;
+        window.chatTimers[startTime].interval = setTimerInterval(timerBox, startTime);
+        pauseButton.removeClass('paused');
+        pauseButton.text('pause');
+        window.MB.sendMessage("custom/myVTT/restartTimer", {startTime, newDuration});
+      }else{
+        clearInterval(window.chatTimers[startTime].interval);
+        window.MB.sendMessage("custom/myVTT/pauseTimer", {startTime});
+        pauseButton.addClass('paused');
+        pauseButton.text('play_arrow');
+      }
+
+    });
+    buttonContainer.append(pauseButton);
+    timerBox.append(buttonContainer);
+  }
+  timerBox.append(closeButton);
+  $(".glc-game-log > [class*='-GameLog']").before(timerBox);
+  window.chatTimers[startTime]= {
+    remaining: duration,
+    interval: setTimerInterval(timerBox, startTime)
+  }
 }
 /** The string "THE DM" has been used in a lot of places.
  * This prevents typos or case sensitivity in strings.
