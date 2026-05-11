@@ -1935,12 +1935,22 @@ async function rebuild_window_pcs() {
  * @returns {string[]}
  */
 function get_my_known_languages() {
+  if(is_spectator_page()) return ['Common', 'Telepathy']; //reasonable default
   const pc = find_pc_by_player_id(my_player_id())
   const knownLanguages = pc?.proficiencyGroups.find(g => g.group === "Languages")?.values?.trim().split(/\s*,\s*/gi) ?? [];
   knownLanguages?.push('Telepathy');
   return knownLanguages;
 }
 
+// the special string to whisper to spectator screens
+const SPECTATOR_WHISPER_ID = "-spectator";
+
+function canHearWhisper(whisper) {
+  if(!whisper) return true;
+  const myName = is_spectator_page() ? SPECTATOR_WHISPER_ID : window.PLAYER_NAME;
+  const myId = is_spectator_page() ? SPECTATOR_WHISPER_ID : `${window.myUser}`
+  return (whisper === myName || (Array.isArray(whisper) && whisper.includes(myId)));
+}
 
 function update_pc_with_data(playerId, data) {
   if (data.constructor !== Object) {
@@ -2879,6 +2889,167 @@ function display_url_embeded(url){
   container.append(iframe);
   $('body').append(container);
 }
+
+//+++ dialog menus in the style of top level tools
+// todo:
+// -- more general options for dialog menus (when used beyond send-player buttons)
+function dialogMenuOption(rootId, container, opt) {
+  if(opt.type === 'hr') {
+    $(`<span class="js-popup-decoration">${opt.label || ""}</span>`).appendTo(container);      
+  } else {
+    const icon = opt.icon ? `<span class="material-symbols-outlined" style="font-size: inherit;">${opt.icon}</span>` : "";
+    // hasTooltip style has some layout issues so doing old school for now:
+    const button = $(`<button id='${rootId}_${opt.id}' class="js-popup-option" data-id='${opt.id}'>${icon}${opt.label}</button>`);
+    if(opt.tooltip) button.attr('title', opt.tooltip)
+    //ddbc-tab-options__header-heading
+    const callback = opt.callback;
+    const closeAfter = opt.closeAfter;
+    if(opt.active) button.addClass("js-popup--is-active");
+    button.on('click', function (e) {
+      const buttonSelectedClasses = "js-popup--is-active"
+      $(this).toggleClass(buttonSelectedClasses);
+      e.preventDefault()
+      if(callback) callback(e);
+      if(closeAfter) $(e.target).closest(".js-popup")?.[0]?.close();      
+    });
+    button.appendTo(container);
+  }
+}
+function createDialogMenu(rootId, options) {
+  const dialog = $(`<dialog id="${rootId}" class="js-popup">
+  <form method="dialog"><div class="js-popup-options prevent-sidebar-modal-close"/></form></dialog>`);
+  const contain = dialog.find('.js-popup-options')[0]
+  options.map((opt) => dialogMenuOption(rootId, contain, opt));
+  return dialog[0]; //note: return native element, NOT jquery
+}
+
+//turn an element into a menu trigger
+function makeDialogMenuTrigger(element, trigger, menuId, createMenu, onShow) {
+  const elementId = uuid(); //give it a uuid so we can find it later in menu code
+  element.attr('id', elementId);
+  element.addClass("js-popup-trigger")
+  element.off(trigger).on(trigger, (e) => {
+    //create the dialog on first use
+    e.preventDefault();
+    e.stopPropagation();
+    const dialog = $("#"+menuId, e.target.ownerDocument)?.[0] || createMenu(menuId, e.target);
+    if(dialog.open) {
+      dialog.close();
+    } else {
+      if(onShow) onShow(e, dialog, elementId); //before show callback
+      //right now using show (but could decide that showModal is better)
+      dialog.show(); //so we can get dimensions 
+      $(dialog).attr("data-whichbutton", elementId) //remember who triggered
+      const rect = $(e.target)[0].getBoundingClientRect();
+      const menuRect = $(dialog)[0].getBoundingClientRect();
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+      const top = Math.max(10, (rect.bottom + menuRect.height > winH) 
+        ? rect.top - menuRect.height 
+        : rect.bottom);
+      const left = Math.max(10, (rect.left + menuRect.width > winW) 
+        ? winW - menuRect.width - 10 
+        : rect.left);      
+      $(dialog).css({
+        position: 'fixed', // Stays put during scroll
+        top: top + 'px',
+        left: left + 'px',
+      });
+    }
+  });
+  return element;
+}
+
+function dialogCloser(e, force) {
+  e.target.ownerDocument.querySelectorAll('dialog.js-popup[open]').forEach(menu => {
+    const isClickInside = menu.contains(e.target);
+    const isTriggerClick = e.target.closest('.js-popup-trigger');
+    const isClickOnChild = menu.contains(e.target);
+    if (!isClickInside && !isTriggerClick && !isClickOnChild || force) menu.close();
+  });
+}
+function addDialogCloser(element) {
+  const doc = element.ownerDocument;
+  //even tho named function so multiple event listeners shouldn't happen
+  //attempt to optimize
+  if (doc._hasDialogCloser) return;
+  doc.addEventListener('mousedown', dialogCloser);
+  doc._hasDialogCloser = true;
+}
+
+function sendPopElement(element, whisper) {
+  const what = element.find(".magnify, .monster-image, video");
+  const src = what?.attr("src");
+  const video = what.prop('nodeName') === 'VIDEO';  
+  if(src) {
+    const msg = { src, timed: 10000, from: window.PLAYER_ID, type: video ? "iframe" : "image" };
+    if(whisper) msg.whisper = whisper;
+    window.MB.sendMessage('custom/myVTT/Popup',  msg);
+  } else {
+    console.error("Could not find image to pop", src);
+  }
+}
+function sendClonedElement(element, whisper) {
+  const targetBlock = $(element).clone();
+  targetBlock.find('button.block-send-to-game-log').remove();
+  targetBlock.find('img, video').removeAttr('width height style').toggleClass('magnify', true);
+  const video = targetBlock.find('video');
+  //why?
+  if(video) video.attr("href", video.attr('src'));
+  send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, whisper);
+}
+
+function createSendPlayerMenu(menuId, target) {
+  // If campaign changes then will need to remove and re-create menu
+  const callback_with_selection = (e, verb) => {
+    const dialog = $(e.target).closest(".js-popup")?.[0];      
+    const options = $(e.target).closest(".js-popup-options")?.[0];
+    const selected = $(options).find('.js-popup--is-active').map((i, el) => el.getAttribute('data-id')).get().filter((a)=> !a.startsWith('_'));
+    const theTriggeringButton = $(`#${$(dialog).attr("data-whichbutton")}`);
+    //todo: if selected is everyone then use undefined here:
+    ((verb === 'pop') ? sendPopElement : sendClonedElement)(theTriggeringButton.parent(), selected);
+    $(e.target).removeClass('js-popup--is-active');
+  };
+  const toggle_everyone = (e, skipCount) => {
+    $(e.target).removeClass('js-popup--is-active');    
+    const options = $(e.target).closest(".js-popup-options");
+    const selected = $(options).find('.js-popup--is-active');
+    if(selected.length === 0) {
+      options.children().slice(skipCount+1).toggleClass('js-popup--is-active');
+    } else {
+      selected.toggleClass('js-popup--is-active');      
+    }
+  }
+  const users = [...new Map(window.playerUsers.map(p => [p.userId, {id: p.userId, label: p.userName, active: true}])).values(), { id: SPECTATOR_WHISPER_ID, label: "-Spectator-", active: true}];
+  const menu = createDialogMenu(menuId, [
+    { id: "_send", label: "Send To Log", callback: (e) => callback_with_selection(e, "send"), icon: "login", tooltip: "Send to Gamelog of selected users", closeAfter: true},
+    { id: "_pop", label: "Popup", icon: "toast", callback: (e) => callback_with_selection(e, "pop"), tooltip: "Popup a momentary image for selected users", closeAfter: true },
+    { id: "_everyone", label: "Toggle All", icon: "toggle_on", callback: (e) => toggle_everyone(e, 3), tooltip: "Toggle user buttons below"},
+    { type: "hr", label: "Users" },
+    ...users
+  ]);
+  $(target).closest('body').append(menu);
+  addDialogCloser(target);
+  return menu;
+}
+
+function setPlayerButtonSetPopupStatus(e, dialog, buttonId) {
+  const hasPopupOption = $("#"+buttonId).attr("data-haspopup");
+  $("#send-player-menu__pop", e.target.ownerDocument).css("display", hasPopupOption ? "" : "none"); 
+}
+function createSendPlayerButton(parent, icon, hasPopupOption=false ) {
+  const element = $(`<button width="200px" height="200px"> <span class="material-symbols-outlined">${icon}</span></button>`);
+  const button = makeDialogMenuTrigger(element, 'contextmenu', "send-player-menu", createSendPlayerMenu, setPlayerButtonSetPopupStatus);
+  button.off('click').on('click', (e)=> {
+    e.preventDefault();
+    e.stopPropagation();
+    sendClonedElement($(e.target).closest("button").parent());
+  });
+  if(hasPopupOption) button.attr("data-haspopup", "1");
+  button.addClass("block-send-to-game-log");
+  return button;
+}
+//-end- dialog menus 
 
 function find_or_create_generic_draggable_window(id, titleBarText, addLoadingIndicator = true, addPopoutButton = false, popoutSelector=``, width='80%', height='80%', top='10%', left='10%', showSlow = true, cancelClasses='', hideOnX = false, alwaysDisplayTitle = false) {
   console.log(`find_or_create_generic_draggable_window id: ${id}, titleBarText: ${titleBarText}, addLoadingIndicator: ${addLoadingIndicator}, addPopoutButton: ${addPopoutButton}`);

@@ -87,28 +87,26 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
       if(token.options.imgsrc.startsWith('above-bucket-not-a-url')){
         imageUrl = await getAvttStorageUrl(imageUrl);
       }
-      container.find(`.avtt-stat-block-container`).append(`<div class="image" style="display: block;"><${(token.options.videoToken == true || ['.mp4', '.webm', '.m4v'].some(d => token.options.imgsrc.includes(d))) ? 'video disableremoteplayback muted' : 'img'}
+      //todo: evaluate block -> inline-block change here.
+      container.find(`.avtt-stat-block-container`).append(`<div class="image" style="display: inline-block; position: relative;"><${(token.options.videoToken == true || ['.mp4', '.webm', '.m4v'].some(d => token.options.imgsrc.includes(d))) ? 'video disableremoteplayback muted' : 'img'}
             src="${imageUrl}"    
             class="monster-image"
             style="max-width: 100%;">
-            </div>
-            <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
-                <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${imageUrl}" target='_blank' >Send Image To Gamelog</a>
             </div>`);
     }
+  
     add_aoe_statblock_click(container, tokenId);
-    container.find("#monster-image-to-gamelog-link").on("click", function (e) {
-      e.stopPropagation();
-      e.preventDefault();
-      const imgContainer = $(e.target).parent().prev();
-      imgContainer.find("img, video").attr("href", imgContainer.find("img, video").attr("src"));
-      imgContainer.find("img, video").addClass("magnify");
-      send_html_to_gamelog(imgContainer[0].outerHTML);
-    });
 
+    container.find("img.monster-image, .monster-image").each((i,block) => {
+      createSendPlayerButton(block, "login", true).insertAfter(block);
+    });
+    //Note: this is async - that is why code just above here isn't lower down
     if(!customStatBlock){
-      statBlock.imageHtml(token).then(imageHtml => { 
-        container.find("div.image").append(imageHtml); 
+      statBlock.imageHtml(token).then(theImage => {
+        //add in send-to features
+        container.find("div.image").append(theImage).find("img.monster-image, video").each((i,block) => {
+          createSendPlayerButton(block, "login", true).insertAfter(block);
+        });
       })
     }
       
@@ -119,6 +117,8 @@ async function display_stat_block_in_container(statBlock, container, tokenId, cu
       add_ability_tracker_inputs(container, tokenId)
     // scan_creature_pane(container, statBlock.name, statBlock.image);
     add_stat_block_hover(container, tokenId);
+  
+    //todo: new sendtogamelog menu for these too?
     container.find("p>em>strong, p>strong>em, div>strong>em, div>em>strong, p>span>em>strong, p>span>strong>em").off("contextmenu.sendToGamelog").on("contextmenu.sendToGamelog", function (e) {
       e.preventDefault();
       if(e.altKey || e.shiftKey || (!isMac() && e.ctrlKey) || e.metaKey)
@@ -465,11 +465,6 @@ async function build_monster_stat_block(statBlock, token) {
                             
                             
                   <div class="image" style="display: block;"></div>
-                  <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
-                      <a class="ddbeb-button monster-details-link" href="${statBlock.data.url}" target='_blank' >View Details Page</a>
-                      <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${image}" target='_blank' >Send Image To Gamelog</a>
-                  </div>
-
 
                   <div class="more-info-content" style="padding:10px;">
 
@@ -760,11 +755,6 @@ async function build_monster_stat_block(statBlock, token) {
 
 
                 <div class="image" style="display: block;"></div>
-                <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;padding:10px;">
-                    <a class="ddbeb-button monster-details-link" href="${statBlock.data.url}" target='_blank' >View Details Page</a>
-                    <a id="monster-image-to-gamelog-link" class="ddbeb-button monster-details-link" href="${image}" target='_blank' >Send Image To Gamelog</a>
-                </div>
-
 
                 <div class="more-info-content" style="padding:10px;">
 
@@ -1751,15 +1741,11 @@ class MonsterStatBlock {
             }
             console.log("imageHtml failed to load image. Trying nextUrl", nextUrl, el, e);
             el.attr("src", nextUrl);
-            el.parent().attr("href", nextUrl);
-            el.parent().attr("data-title", `<a target='_blank' href='${nextUrl}' class='link link-full'>View Full Image</a>`);
-        });
-
-
-      let html = $(`<a href="${imageSrc}" data-title="<a target='_blank' href='${imageSrc}' class='link link-full'>View Full Image</a>"
-           target="_blank"></a>`);
-        html.append(img);
-        return html;
+         });
+      
+      const html = $(`<div style="display: inline-block; position: relative;"></div>`);
+      html.append(img);
+      return html;
     }
 }
 
