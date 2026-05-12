@@ -2979,7 +2979,7 @@ function addDialogCloser(element) {
 
 function sendPopElement(element, whisper) {
   const what = element.find(".magnify, .monster-image, video");
-  const src = what?.attr("src");
+  const src = what.find('source').length>0 ? what.find('source').attr('src') : what.attr("src");
   const video = what.prop('nodeName') === 'VIDEO';  
   if(src) {
     const msg = { src, timed: 10000, from: window.PLAYER_ID, type: video ? "iframe" : "image" };
