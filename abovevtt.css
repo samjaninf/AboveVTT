@@ -919,7 +919,7 @@ select#doorTypeSelectUVTT{
     width: 6px;
     height: calc(100vh - 30px);
     cursor: ew-resize;
-    z-index: 99999;
+    z-index: 80;
     background: transparent;
 }
 #avtt-sidebar-resize-handle:hover {

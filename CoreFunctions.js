@@ -2994,8 +2994,9 @@ function sendClonedElement(element, whisper) {
   targetBlock.find('button.block-send-to-game-log').remove();
   targetBlock.find('img, video').removeAttr('width height style').toggleClass('magnify', true);
   const video = targetBlock.find('video');
-  //why?
-  if(video) video.attr("href", video.attr('src'));
+  if(video) {
+    video.attr({href:video.attr('src'), muted: true, autoplay: true, loop: true, disableRemotePlayback: true, controls:false});
+  }
   send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, whisper);
 }
 
