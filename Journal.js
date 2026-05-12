@@ -2259,7 +2259,7 @@ class JournalManager{
 			return container;
 		});
 		blocks.each((i, block) => {
-			createSendPlayerButton(block, "login", block instanceof HTMLImageElement).insertAfter(block);			
+			createSendPlayerButton(block, "login", block instanceof HTMLImageElement || block instanceof HTMLVideoElement).insertAfter(block);			
 		});
 
 		const tables = target.find('table');
