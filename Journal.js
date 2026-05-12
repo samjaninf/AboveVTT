@@ -2452,13 +2452,14 @@ class JournalManager{
 		}
 		const embededIframes = target.find('iframe');
 		for(let i=0; i<embededIframes.length; i++){
-			if(!embededIframes[i].src.startsWith(window.EXTENSION_PATH))
+			if(embededIframes[i].src.includes("youtube")){
+				embededIframes[i].src = embededIframes[i].src.replace(/youtube(-nocookie)?\.com/gi, 'youtube-nocookie.com');
+			}
+			else if(!embededIframes[i].src.startsWith(window.EXTENSION_PATH)){
 				embededIframes[i].src = `${window.EXTENSION_PATH}iframe.html?src=${encodeURIComponent(embededIframes[i].src)}`;
+			}
 		}
 
-
-
-		
 
     	let data = $(target).clone().html();
 
