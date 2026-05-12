@@ -2994,20 +2994,18 @@ function sendClonedElement(element, whisper) {
   targetBlock.find('button.block-send-to-game-log').remove();
   targetBlock.find('img, video').removeAttr('width height style').toggleClass('magnify', true);
   const video = targetBlock.find('video');
-  const source = video.find('source');
-  const src = source.length>0 ? source.attr('src') : video.attr('src');
-  const clone = targetBlock.clone();
+
   if(video) {
-    clone.find('video>source').remove();
-    const videoElement = clone.find('video')[0];
-    videoElement.muted = true;
-    videoElement.autoplay = true;
-    videoElement.loop = true;
-    videoElement.controls = false;
-    videoElement.playsInline = true;
-    clone.find('video').attr({src:src, href:src});
+    const videoElements = targetBlock.find('video');
+    for(let i=0; i<videoElements.length; i++){
+      const videoElement = videoElements[i];
+      const source = $(videoElement).find('source');
+      const src = source.length>0 ? source.attr('src') : $(videoElement).attr('src');
+      source.remove();
+      $(videoElement).attr({muted:'muted', disableRemotePlayback: true, src:src, href:src});
+    }
   }
-  send_html_to_gamelog(`<p>${clone[0].outerHTML}</p>`, whisper);
+  send_html_to_gamelog(`<p>${targetBlock[0].outerHTML}</p>`, whisper);
 }
 
 function createSendPlayerMenu(menuId, target) {
