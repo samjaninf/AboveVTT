@@ -217,17 +217,22 @@ function inject_chat_buttons() {
     return;
   }
   add_dice_stream_gamelog_button();
-  const chatTextWrapper = $(`<div class='chat-text-wrapper sidebar-hover-text' data-hover="Dice Rolling Format: /cmd diceNotation action  &#xa;
-    '/r 1d20'&#xa;
-    '/roll 1d4 punch:bludgeoning damage'&#xa;
-    '/hit 2d20kh1+2 longsword ADV'&#xa;
-    '/dmg 1d8-2 longsword:slashing'&#xa;
-    '/save 2d20kl1 DEX DISADV'&#xa;
-    '/skill 1d20+1d4 Thieves' Tools + Guidance'&#xa;
-    Advantage: 2d20kh1 (keep highest)&#xa;
-    Disadvantage: 2d20kl1 (keep lowest)&#xa;
-    '/w [playername] a whisper to playername'&#xa;
-    '/dm for a shortcut to whisper THE DM'&#xa;
+  const chatTextWrapper = $(`<div class='chat-text-wrapper sidebar-hover-text' data-hover="Dice Rolling Format: /cmd diceNotation action  
+    '/r 1d20'
+    '/roll 1d4 punch:bludgeoning damage'
+    '/hit 2d20kh1+2 longsword'
+    '/dmg 1d8-2 longsword:slashing'
+    '/save 2d20kl1 DEX'
+    '/skill 1d20+1d4 Thieves' Tools + Guidance'
+    '/heal 1d4+WIS Healing Word'
+Roll Modifiers:
+    Advantage: 2d20kh1 (keep highest)
+    Disadvantage: 2d20kl1 (keep lowest)
+    Min: 2d6min3 (minimum 3)
+    Reroll: 2d6ro<2 (reroll <2, Can also use = or <=)
+Other Commands:
+    '/w [playername] a whisper to playername'
+    '/dm for a shortcut to whisper THE DM'
     '/timer Timer Title 5:00' or '/timer 5:00'"><input id='chat-text' autocomplete="off" placeholder='Chat, /r 1d20+4..'></div>`
   );
   const diceRoller = $(`
